@@ -59,7 +59,7 @@ module {
       case (?version, ?data, null, null) {
         (version, data, false)
       };
-      case (_, _, ?(compressionFlag), _) {
+      case (_, _, ?(_compressionFlag), _) {
         return #err ("Invalid compression flag.");
       };
       case _ {

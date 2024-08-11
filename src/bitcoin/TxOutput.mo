@@ -9,19 +9,25 @@ import Types "./Types";
 module {
   // Deserialize TxOutput from data with layout:
   // | amount | serialized script |
-  public func fromBytes(data : Iter.Iter<Nat8>)
-    : Result.Result<TxOutput, Text> {
+  public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<TxOutput, Text> {
     return switch (ByteUtils.readLE64(data), Script.fromBytes(data, true)) {
       case (?amount, #ok script) {
-        #ok (TxOutput(amount, script))
+        #ok(TxOutput(amount, script));
       };
-      case (?amount, #err (msg)) {
-        #err ("Could not decode script: " # msg)
+      case (?_amount, #err(msg)) {
+        #err("Could not decode script: " # msg);
       };
       case (null, _) {
-        #err "Could not read TxOut amount"
+        #err "Could not read TxOut amount";
       };
     };
+  };
+
+  public func toBytes(txout : TxOutput) : [Nat8] {
+    let amount_bytes = Array.init<Nat8>(8, 0);
+    Common.writeLE64(amount_bytes, 0, txout.amount);
+    let script_bytes = Script.toBytes(txout.scriptPubKey);
+    Array.append<Nat8>(Array.freeze(amount_bytes), script_bytes);
   };
 
   // Representation of a TxOutput of a Bitcoin transaction. A TxOutput locks

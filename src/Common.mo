@@ -4,7 +4,6 @@ import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
-import Array  "mo:base/Array";
 
 module {
   // Read big endian 32-bit natural number starting at offset.
