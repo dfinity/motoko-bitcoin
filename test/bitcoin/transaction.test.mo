@@ -2,7 +2,7 @@ import Transaction "../../src/bitcoin/Transaction";
 import TxInput "../../src/bitcoin/TxInput";
 import TxOutput "../../src/bitcoin/TxOutput";
 import P2pkh "../../src/bitcoin/P2pkh";
-import PublicKey "../../src/ecdsa/Publickey";
+import Witness "../../src/bitcoin/Witness";
 import Curves "../../src/ec/Curves";
 import TestUtils "../TestUtils";
 import Debug "mo:base/Debug";
@@ -51,7 +51,10 @@ func makeTransaction(testCase : TransactionTestCase) : Transaction.Transaction {
         };
       };
     });
-  return Transaction.Transaction(testCase.version, txIns, txOuts, 0);
+
+  let emptyWitness = Array.thaw<Witness.Witness>([]);
+
+  return Transaction.Transaction(testCase.version, txIns, txOuts, emptyWitness, 0);
 };
 
 let transactionTestCases : [TransactionTestCase] = [{
@@ -165,8 +168,6 @@ func testTransactionId(testCase : TransactionTestCase) {
 
   assert(testCase.expectedId == actualId);
 };
-
-Debug.print("Transaction");
 
 let runTest = TestUtils.runTestWithDefaults;
 

@@ -2,9 +2,6 @@ import Types "./Types";
 import EcdsaTypes "../ecdsa/Types";
 import Ecdsa "../ecdsa/Ecdsa";
 import Base58Check "../Base58Check";
-import SHA256 "../../motoko-sha/src/SHA256";
-import Ripemd160 "../Ripemd160";
-import PublicKey "../ecdsa/Publickey";
 import ByteUtils "../ByteUtils";
 import Hash "../Hash";
 import Script "./Script";
@@ -89,7 +86,7 @@ module {
       case (?(0x6f), ?publicKeyHash) {
         #ok {network = #Testnet; publicKeyHash = publicKeyHash}
       };
-      case (?(networkId), ?_) {
+      case (?(_networkId), ?_) {
         #err ("Unrecognized network id.")
       };
       case _ {

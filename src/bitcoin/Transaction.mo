@@ -14,7 +14,7 @@ import Types "./Types";
 import TxInput "./TxInput";
 import TxOutput "./TxOutput";
 import Witness "Witness";
-import SHA256 "../../motoko-sha/src/SHA256";
+import Sha256 "mo:sha2/Sha256";
 
 module {
 
@@ -226,7 +226,7 @@ module {
       let nVersion = Array.freeze<Nat8>(nVersion_buffer);
 
       let nLockTime : [Nat8] = Array.freeze(Array.init<Nat8>(4, 0));
-      let sha_prevouts : [Nat8] = SHA256.sha256(Array.flatten(prevouts));
+      let sha_prevouts : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, Array.flatten(prevouts)));
 
       let amounts_bytes = Array.flatten(
         Array.map<Nat64, [Nat8]>(
@@ -238,10 +238,10 @@ module {
           },
         )
       );
-      let sha_amounts : [Nat8] = SHA256.sha256(amounts_bytes);
+      let sha_amounts : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, amounts_bytes));
 
       let scriptpubkeys = Array.init<[Nat8]>(txInputs.size(), Script.toBytes(scriptPubKey));
-      let sha_scriptpubkeys : [Nat8] = SHA256.sha256(Array.flatten(Array.freeze(scriptpubkeys)));
+      let sha_scriptpubkeys : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, Array.flatten(Array.freeze(scriptpubkeys))));
 
       // ignote the nSequence flag
       // this is inlined generation of the 0xFFFFFFFF flag for each input
@@ -256,7 +256,7 @@ module {
         },
       );
       let sequences = Array.flatten(sequences_buffer);
-      let sha_sequences : [Nat8] = SHA256.sha256(sequences);
+      let sha_sequences : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, sequences));
 
       let outputs_bytes = Array.flatten(
         Array.map<TxOutput.TxOutput, [Nat8]>(
@@ -267,7 +267,7 @@ module {
         )
       );
 
-      let sha_outputs : [Nat8] = SHA256.sha256(outputs_bytes);
+      let sha_outputs : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, outputs_bytes));
 
       // (ext_flag * 2) + annex_present
       let spend_type : [Nat8] = [0x00];

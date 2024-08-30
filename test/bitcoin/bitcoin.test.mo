@@ -1,17 +1,12 @@
 import Bitcoin "../../src/bitcoin/Bitcoin";
-import Transaction "../../src/bitcoin/Transaction";
 import Types "../../src/bitcoin/Types";
-import Base58Check "../../src/Base58Check";
 import Script "../../src/bitcoin/Script";
 import Address "../../src/bitcoin/Address";
 import Wif "../../src/bitcoin/Wif";
-import Jacobi "../../src/ec/Jacobi";
-import Curves "../../src/ec/Curves";
 import TestUtils "../TestUtils";
 import Hex "../Hex";
 import BitcoinTestTools "./bitcoinTestTools";
 import Array "mo:base/Array";
-import Result "mo:base/Result";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
@@ -417,8 +412,8 @@ let signTestCases : [SignTransactionTestCase] = [
 ];
 
 func testSignTransaction(testCase : SignTransactionTestCase) {
-  let {privateKey;
-       signingNonces;
+  let {privateKey = _;
+       signingNonces = _;
        utxos;
        destinations;
        changeAddress;
@@ -485,7 +480,7 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
   let ecdsaProxy = BitcoinTestTools.EcdsaProxy(
     testCase.privateKey, testCase.signingNonces);
   switch (
-    Bitcoin.createSignedTransaction(
+    Bitcoin.createSignedP2pkhTransaction(
       #p2pkh (ecdsaProxy.p2pkhAddress()), ecdsaProxy, [],
       1, mappedUtxos, destinations, changeAddress, fees),
     result,
@@ -506,7 +501,7 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
       let serialized = tx.toBytes();
       assert(serialized == data);
     };
-    case (#err msg, false, _) {
+    case (#err _msg, false, _) {
       // Ok.
     };
     case _ {

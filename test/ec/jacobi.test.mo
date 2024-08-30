@@ -1,5 +1,4 @@
 import Debug "mo:base/Debug";
-import Nat64 "mo:base/Nat64";
 import Nat "mo:base/Nat";
 import Iter "mo:base/Iter";
 import Array "mo:base/Array";
@@ -124,7 +123,7 @@ func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
           // Point is successfully decoded, compute ECDH.
           switch(Jacobi.toAffine(
             Jacobi.mul(#point point, privateKey))) {
-            case (#point (x, y, _)) {
+            case (#point (x, _y, _)) {
               // If we are here, then the test is expected to succeed.
               assert(testCase.result != "invalid");
               assert(expectedOutput == x.value);
@@ -149,7 +148,7 @@ func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
   };
 };
 
-Debug.print("Jacobi Points over Secp256k1 Curve");
+// Jacobi Points over Secp256k1 Curve
 
 runTest({
   title = "Addition";

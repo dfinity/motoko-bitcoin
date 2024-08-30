@@ -64,7 +64,7 @@ func test(tcase : TestCase) {
 
   assert(tx.toBytes() == txData);
 
-  let actualSighash = tx.createSignatureHash(script, tcase.inputIndex, hashType);
+  let actualSighash = tx.createP2pkhSignatureHash(script, tcase.inputIndex, hashType);
   assert(expectedResult == actualSighash);
 };
 

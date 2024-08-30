@@ -1,4 +1,3 @@
-import Affine "../../src/ec/Affine";
 import Jacobi "../../src/ec/Jacobi";
 import Curves "../../src/ec/Curves";
 import Fp "../../src/ec/Fp";
@@ -6,16 +5,10 @@ import Types "../../src/bitcoin/Types";
 import Common "../../src/Common";
 import Wif "../../src/bitcoin/Wif";
 import P2pkh "../../src/bitcoin/P2pkh";
-import Script "../../src/bitcoin/Script";
-import EcdsaTypes "../../src/ecdsa/Types";
 import PublicKey "../../src/ecdsa/Publickey";
-import Der "../../src/ecdsa/Der";
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
-import Iter "mo:base/Iter";
-import Buffer "mo:base/Buffer";
 import Nat8 "mo:base/Nat8";
-import Nat32 "mo:base/Nat32";
 import Blob "mo:base/Blob";
 import Int "mo:base/Int";
 
@@ -45,7 +38,7 @@ module {
     };
 
     // Sign given data and return Der encoded signature.
-    public func sign(data : Blob, derivationPath : [Blob]) : Blob {
+    public func sign(data : Blob, _derivationPath : [Blob]) : Blob {
       let signature = ecdsaSign(
         bitcoinPrivateKey.key,
         signingNonces[nextNonce],
@@ -92,7 +85,7 @@ module {
   func ecdsaSign(sk : Nat, rand : Nat, hash : [Nat8]) : Signature {
     let h = Common.readBE256(hash, 0);
     switch(Jacobi.toAffine(Jacobi.mulBase(rand, Curves.secp256k1))) {
-      case (#point (x, y, curve)) {
+      case (#point (x, _y, curve)) {
         let r = x.value;
         if (r == 0) {
           Debug.trap("r = 0, use different rand.");
