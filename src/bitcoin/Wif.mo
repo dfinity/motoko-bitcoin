@@ -9,7 +9,7 @@ module {
   public type WifPrivateKey = Text;
 
   // Map network to WIF version prefix.
-  func encodeVersion(network : Types.Network) : Nat8 {
+  func _encodeVersion(network : Types.Network) : Nat8 {
     return switch (network) {
       case (#Mainnet) {
         0x80;
