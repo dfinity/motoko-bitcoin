@@ -14,7 +14,7 @@ module {
         publicKeyHash : [Nat8];
     };
 
-    // Create P2PKH script for the given P2PKH address.
+    // Create script for the given P2TR key spend address.
     public func makeScriptFromP2trKeyAddress(address : P2trKeyAddress) : Result.Result<Script, Text> {
         return switch (Segwit.decode(address)) {
             case (#ok(_, { version = _; program })) {
