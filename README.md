@@ -1,17 +1,13 @@
 # Algorithms for Bitcoin Integration in Motoko
 
+Requires the [`mops`](https://docs.mops.one/quick-start) package manager for Motoko.
+
 ## Testing
-
-Pull dependencies
-
-```
-git submodule update --init
-```
 
 Run all tests
 
 ```
-make test
+mops test --mode wasi
 ```
 
 ## Usage
