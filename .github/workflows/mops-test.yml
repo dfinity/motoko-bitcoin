@@ -22,5 +22,8 @@ jobs:
       - name: Show mops version
         run: mops -v
 
+      - name: Install all mops dependencies
+        run: mops install
+
       - name: run tests
         run: mops test --mode wasi
