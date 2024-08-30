@@ -15,5 +15,5 @@ test = "2.0.0"
 
 [toolchain]
 wasmtime = "22.0.0"
-moc = "0.11.3"
+moc = "0.12.1"
 pocket-ic = "1.0.0"
