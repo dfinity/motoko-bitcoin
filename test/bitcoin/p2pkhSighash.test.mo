@@ -1,7 +1,7 @@
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Int32 "mo:base/Int32";
-import TestCases "./sighashTestVectors";
+import TestCases "./p2pkhSighashTestVectors";
 import TestUtils "../TestUtils";
 import Hex "../Hex";
 import Script "../../src/bitcoin/Script";
