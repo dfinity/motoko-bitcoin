@@ -26,7 +26,7 @@ func test(tcase : TestCase) {
   };
 
   if (tcase.witness) {
-    // Skip not supported witness version.
+    // Skip not supported P2WPKH.
     return;
   };
 
