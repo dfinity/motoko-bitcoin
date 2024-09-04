@@ -3,6 +3,7 @@ import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Char "mo:base/Char";
+import { test } "mo:test";
 
 let validChecksumBech32 : [Text] = [
   "A12UEL5L",
@@ -137,18 +138,38 @@ func testInvalidChecksumBech32m(testCase : Text) {
   };
 };
 
-Debug.print("Bech32");
-do {
-  for (i in Iter.range(0, validChecksumBech32.size() - 1)) {
-    testValidChecksumBech32(validChecksumBech32[i]);
-  };
-  for (i in Iter.range(0, validChecksumBech32m.size() - 1)) {
-    testValidChecksumBech32m(validChecksumBech32m[i]);
-  };
-  for (i in Iter.range(0, invalidChecksumBech32.size() - 1)) {
-    testInvalidChecksumBech32(invalidChecksumBech32[i]);
-  };
-  for (i in Iter.range(0, invalidChecksumBech32m.size() - 1)) {
-    testInvalidChecksumBech32m(invalidChecksumBech32m[i]);
-  };
-};
+test(
+  "valid bech32",
+  func() {
+    for (i in Iter.range(0, validChecksumBech32.size() - 1)) {
+      testValidChecksumBech32(validChecksumBech32[i]);
+    };
+  },
+);
+
+test(
+  "valid bech32m",
+  func() {
+    for (i in Iter.range(0, validChecksumBech32m.size() - 1)) {
+      testValidChecksumBech32m(validChecksumBech32m[i]);
+    };
+  },
+);
+
+test(
+  "invalid bech32",
+  func() {
+    for (i in Iter.range(0, invalidChecksumBech32.size() - 1)) {
+      testInvalidChecksumBech32(invalidChecksumBech32[i]);
+    };
+  },
+);
+
+test(
+  "invalid bech32m",
+  func() {
+    for (i in Iter.range(0, invalidChecksumBech32m.size() - 1)) {
+      testInvalidChecksumBech32m(invalidChecksumBech32m[i]);
+    };
+  },
+);

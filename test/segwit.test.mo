@@ -6,6 +6,7 @@ import Array "mo:base/Array";
 import Nat8 "mo:base/Nat8";
 import Text "mo:base/Text";
 import Char "mo:base/Char";
+import { test } "mo:test";
 
 type ValidAddressTestCase = {
   address : Text;
@@ -156,7 +157,7 @@ func scriptPubKey({version; program} : Segwit.WitnessProgram) : [Nat8] {
     output.add(val);
   };
 
-  return output.toArray();
+  return Buffer.toArray(output);
 };
 
 func toLower(text : Text) : Text {
@@ -171,20 +172,14 @@ func toLower(text : Text) : Text {
 // Test whether valid addresses decode to the correct output.
 func testValidAddress(testCase : ValidAddressTestCase) {
   var hrp = "bc";
-  let witnessProgram = switch (Segwit.decode(hrp, testCase.address)) {
-    case (#ok (witnessProgram)) {
+  let witnessProgram = switch (Segwit.decode(testCase.address)) {
+    case (#ok (hrp_decoded, witnessProgram)) {
+      assert hrp_decoded == "bc" or hrp_decoded == "tb";
+      hrp := hrp_decoded;
       witnessProgram;
     };
-    case (#err (_)) {
-      hrp := "tb";
-      switch (Segwit.decode(hrp, testCase.address)) {
-        case (#ok (witnessProgram)) {
-          witnessProgram
-        };
-        case (#err (msg)) {
-          Debug.trap(msg);
-        };
-      };
+    case (#err (msg)) {
+      Debug.trap(msg);
     };
   };
 
@@ -193,7 +188,11 @@ func testValidAddress(testCase : ValidAddressTestCase) {
 
   switch (Segwit.encode(hrp, witnessProgram)) {
     case (#ok (recoded)) {
-      assert(toLower(testCase.address) == toLower(recoded));
+      let lhs = toLower(testCase.address);
+      let rhs = toLower(recoded);
+      if (lhs != rhs) {
+        Debug.trap(lhs # " != " # rhs);
+      };
     };
     case (#err (msg)) {
       Debug.trap(msg);
@@ -203,21 +202,12 @@ func testValidAddress(testCase : ValidAddressTestCase) {
 
 // Test whether invalid addresses fail to decode.
 func testInvalidAddress(testCase : Text) {
-  var hrp = "bc";
-  switch (Segwit.decode(hrp, testCase)) {
-    case (#ok (witnessProgram)) {
-      Debug.trap("First decode succeeded on invalid input: " # testCase);
+  switch (Segwit.decode(testCase)) {
+    case (#ok (hrp, _witnessProgram)) {
+      assert hrp != "bc" and hrp != "tb";
     };
     case (#err (_)) {
-      hrp := "tb";
-      switch (Segwit.decode(hrp, testCase)) {
-        case (#ok (_)) {
-          Debug.trap("Second decode succeeded on invalid input: " # testCase);
-        };
-        case (#err (_)) {
-          // Test passed..
-        };
-      };
+      // Test passed..
     };
   };
 };
@@ -235,15 +225,29 @@ func testInvalidAddressEncoding(testCase : InvalidAddressEncodingTestCase) {
   };
 };
 
-Debug.print("Segwit Addresses");
-do {
-  for (i in Iter.range(0, validAddressTestCases.size() - 1)) {
-    testValidAddress(validAddressTestCases[i]);
-  };
-  for (i in Iter.range(0, invalidAddressesTestCases.size() - 1)) {
-    testInvalidAddress(invalidAddressesTestCases[i]);
-  };
-  for (i in Iter.range(0, invalidAddressEncodingTestCases.size() - 1)) {
-    testInvalidAddressEncoding(invalidAddressEncodingTestCases[i]);
-  };
-};
+test(
+  "valid addresses",
+  func() {
+    for (i in Iter.range(0, validAddressTestCases.size() - 1)) {
+      testValidAddress(validAddressTestCases[i]);
+    };
+  },
+);
+
+test(
+  "invalid addresses",
+  func() {
+    for (i in Iter.range(0, invalidAddressesTestCases.size() - 1)) {
+      testInvalidAddress(invalidAddressesTestCases[i]);
+    };
+  },
+);
+
+test(
+  "inalid address encoding",
+  func() {
+    for (i in Iter.range(0, invalidAddressEncodingTestCases.size() - 1)) {
+      testInvalidAddressEncoding(invalidAddressEncodingTestCases[i]);
+    };
+  },
+);

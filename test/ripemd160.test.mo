@@ -2,8 +2,8 @@ import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
-import Debug "mo:base/Debug";
 import Ripemd160 "../src/Ripemd160";
+import {test} "mo:test";
 
 let testData: [(Text, [Nat8])] = [
   (
@@ -64,11 +64,7 @@ let testData: [(Text, [Nat8])] = [
   )
 ];
 
-Debug.print("Ripemd160");
-
-do {
-  Debug.print("  quick hash");
-
+test("quick hash", func() {
   for (i in Iter.range(0, testData.size() - 1)) {
     let input : [Nat8] = Blob.toArray(Text.encodeUtf8(testData[i].0));
     let expected : [Nat8] = testData[i].1;
@@ -76,11 +72,9 @@ do {
 
     assert(expected == actual);
   };
-};
+});
 
-do {
-  Debug.print("  write and reset");
-
+test("write and reset", func() {
   let digest : Ripemd160.Digest = Ripemd160.Digest();
   for (i in Iter.range(0, testData.size() - 1)) {
     let input : [Nat8] = Blob.toArray(Text.encodeUtf8(testData[i].0));
@@ -93,11 +87,9 @@ do {
 
     digest.reset();
   };
-};
+});
 
-do {
-  Debug.print("  multiple writes");
-
+test("multiple writes", func() {
   let digest : Ripemd160.Digest = Ripemd160.Digest();
   digest.write(Blob.toArray(Text.encodeUtf8("abcdefg")));
   digest.write(Blob.toArray(Text.encodeUtf8("hijklmn")));
@@ -107,4 +99,4 @@ do {
   assert([
     247, 28, 39, 16, 156, 105, 44, 27, 86, 187, 220, 235, 91, 157, 40, 101,
     179, 112, 141, 188] == digest.sum());
-};
+});

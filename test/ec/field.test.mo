@@ -1,4 +1,3 @@
-import Debug "mo:base/Debug";
 import Field "../../src/ec/Field";
 import TestUtils "../TestUtils";
 
@@ -278,8 +277,6 @@ func testNegation(vector : NegationTestVector) {
 };
 
 let runTest = TestUtils.runTestWithDefaults;
-
-Debug.print("Test Field");
 
 runTest({
   title = "Addition";
