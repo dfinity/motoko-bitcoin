@@ -560,8 +560,7 @@ module {
       outputOffset += 4;
 
       assert (outputOffset == output.size());
-      let result = Array.freeze(output);
-      result;
+      Array.freeze(output);
     };
   };
 };
