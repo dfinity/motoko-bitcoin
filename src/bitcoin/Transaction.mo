@@ -290,7 +290,7 @@ module {
         input_index,
       ]);
 
-      return Hash.tagged_hash(data, "TapSighash");
+      return Hash.taggedHash(data, "TapSighash");
     };
 
     // Serialize transaction to bytes with layout:
