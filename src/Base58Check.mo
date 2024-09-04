@@ -13,7 +13,7 @@ module {
     let inputWithCheck : [var Nat8] = Array.init<Nat8>(input.size() + 4, 0);
 
     for (i in Iter.range(0, input.size() - 1)) {
-        inputWithCheck[i] := input[i];
+      inputWithCheck[i] := input[i];
     };
 
     inputWithCheck[input.size()] := hash[0];
@@ -26,13 +26,16 @@ module {
 
   // Convert the given checked Base58 input to Base256. Returns null if the
   // checksum verification fails.
-  public func decode(input: Text) : ?[Nat8] {
+  public func decode(input : Text) : ?[Nat8] {
     let decoded : [Nat8] = Base58.decode(input);
 
     // Strip the last 4 bytes.
-    let output = Array.tabulate<Nat8>(decoded.size() - 4, func(i) {
-      decoded[i];
-    });
+    let output = Array.tabulate<Nat8>(
+      decoded.size() - 4,
+      func(i) {
+        decoded[i];
+      },
+    );
 
     // Re-calculate checksum, ensure it matches the included 4-byte checksum.
     let hash : [Nat8] = Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, output)));

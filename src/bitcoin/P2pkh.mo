@@ -2,6 +2,9 @@ import Types "./Types";
 import EcdsaTypes "../ecdsa/Types";
 import Ecdsa "../ecdsa/Ecdsa";
 import Base58Check "../Base58Check";
+import Sha256 "mo:sha2/Sha256";
+import Ripemd160 "../Ripemd160";
+import PublicKey "../ecdsa/Publickey";
 import ByteUtils "../ByteUtils";
 import Hash "../Hash";
 import Script "./Script";
@@ -28,11 +31,11 @@ module {
           #opcode(#OP_HASH160),
           #data(publicKeyHash),
           #opcode(#OP_EQUALVERIFY),
-          #opcode(#OP_CHECKSIG)
+          #opcode(#OP_CHECKSIG),
         ]);
       };
       case (#err msg) {
-        #err msg
+        #err msg;
       };
     };
   };
@@ -50,47 +53,50 @@ module {
   };
 
   // Derive P2PKH address from given public key.
-  public func deriveAddress(network : Types.Network,
-    sec1PublicKey : EcdsaTypes.Sec1PublicKey) : Address {
+  public func deriveAddress(
+    network : Types.Network,
+    sec1PublicKey : EcdsaTypes.Sec1PublicKey,
+  ) : Address {
 
     let (pkData, _) = sec1PublicKey;
     let ripemd160Hash : [Nat8] = Hash.hash160(pkData);
     let versionedHash : [Nat8] = Array.tabulate<Nat8>(
-      ripemd160Hash.size() + 1, func(i) {
+      ripemd160Hash.size() + 1,
+      func(i) {
         if (i == 0) {
-            encodeVersion(network);
+          encodeVersion(network);
         } else {
-            ripemd160Hash[i - 1];
+          ripemd160Hash[i - 1];
         };
-    });
+      },
+    );
     return Base58Check.encode(versionedHash);
   };
 
   // Decode P2PKH hash into its network and public key hash components.
-  public func decodeAddress(address: Address)
-    : Result.Result<DecodedAddress, Text> {
+  public func decodeAddress(address : Address) : Result.Result<DecodedAddress, Text> {
 
-    let decoded: Iter.Iter<Nat8> = switch (Base58Check.decode(address)) {
+    let decoded : Iter.Iter<Nat8> = switch (Base58Check.decode(address)) {
       case (?b58decoded) {
-        b58decoded.vals()
+        b58decoded.vals();
       };
       case _ {
-        return #err ("Could not base58 decode address.");
+        return #err("Could not base58 decode address.");
       };
     };
 
     return switch (decoded.next(), ByteUtils.read(decoded, 20, false)) {
       case (?(0x00), ?publicKeyHash) {
-        #ok {network = #Mainnet; publicKeyHash = publicKeyHash}
+        #ok { network = #Mainnet; publicKeyHash = publicKeyHash };
       };
       case (?(0x6f), ?publicKeyHash) {
-        #ok {network = #Testnet; publicKeyHash = publicKeyHash}
+        #ok { network = #Testnet; publicKeyHash = publicKeyHash };
       };
       case (?(_networkId), ?_) {
         #err ("Unrecognized network id.")
       };
       case _ {
-        #err ("Could not decode address.")
+        #err("Could not decode address.");
       };
     };
   };
