@@ -3,6 +3,7 @@ import Blob "mo:base/Blob";
 import Sha256 "mo:sha2/Sha256";
 import Sha512 "mo:sha2/Sha512";
 
+
 module {
   public type Digest = {
     writeArray : ([Nat8]) -> ();
@@ -22,16 +23,16 @@ module {
   // Sha256 support.
   object sha256DigestFactory {
     public let blockSize : Nat = 64;
-    public func create() : Digest = Sha256.Digest(#sha256);
+    public func create () : Digest = Sha256.Digest(#sha256);
   };
-  public func sha256(key : [Nat8]) : Hmac = HmacImpl(key, sha256DigestFactory);
+  public func sha256(key: [Nat8]) : Hmac = HmacImpl(key, sha256DigestFactory);
 
   // Sha512 support.
   object sha512DigestFactory {
     public let blockSize : Nat = 128;
-    public func create() : Digest = Sha512.Digest(#sha512);
+    public func create () : Digest = Sha512.Digest(#sha512);
   };
-  public func sha512(key : [Nat8]) : Hmac = HmacImpl(key, sha512DigestFactory);
+  public func sha512(key: [Nat8]) : Hmac = HmacImpl(key, sha512DigestFactory);
 
   // Construct HMAC from an arbitrary digest function.
   public func new(key : [Nat8], digestFactory : DigestFactory) : Hmac {
@@ -52,50 +53,38 @@ module {
       let blockSize = digestFactory.blockSize;
       let blockSizedKey : [Nat8] = if (key.size() <= blockSize) {
         // key' = key + [0x00] * (blockSize - key.size())
-        Array.tabulate<Nat8>(
-          blockSize,
-          func(i) {
-            if (i < key.size()) {
+        Array.tabulate<Nat8>(blockSize, func(i) {
+          if (i < key.size()) {
               key[i];
-            } else {
+          } else {
               0;
-            };
-          },
-        );
+          };
+        });
       } else {
         // key' = H(key) + [0x00] * (blockSize - key.size())
         let keyDigest : Digest = digestFactory.create();
         keyDigest.writeArray(key);
         let keyHash = Blob.toArray(keyDigest.sum());
 
-        Array.tabulate<Nat8>(
-          blockSize,
-          func(i) {
+        Array.tabulate<Nat8>(blockSize, func(i) {
             if (i < keyHash.size()) {
-              keyHash[i];
+                keyHash[i];
             } else {
-              0;
+                0;
             };
-          },
-        );
+        });
       };
 
       // H(key' ^ outerPad)
-      let outerPaddedKey = Array.map<Nat8, Nat8>(
-        blockSizedKey,
-        func(byte) {
-          byte ^ outerPad;
-        },
-      );
+      let outerPaddedKey = Array.map<Nat8, Nat8>(blockSizedKey, func(byte) {
+        byte ^ outerPad;
+      });
       outerDigest.writeArray(outerPaddedKey);
 
       // H(key' ^ innerPad)
-      let innerPaddedKey = Array.map<Nat8, Nat8>(
-        blockSizedKey,
-        func(byte) {
-          byte ^ innerPad;
-        },
-      );
+      let innerPaddedKey = Array.map<Nat8, Nat8>(blockSizedKey, func(byte) {
+        byte ^ innerPad;
+      });
       innerDigest.writeArray(innerPaddedKey);
     };
 
@@ -109,4 +98,4 @@ module {
       return outerDigest.sum();
     };
   };
-};
+}
