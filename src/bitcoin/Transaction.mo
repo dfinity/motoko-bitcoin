@@ -19,7 +19,8 @@ import Sha256 "mo:sha2/Sha256";
 module {
 
   // Deserialize transaction from data with the following layout:
-  // | version | len(txIns) | txIns | len(txOuts) | txOuts | locktime |
+  // | version | maybe witness flags | len(txIns) | txIns | len(txOuts) | txOuts
+  // | locktime | witness if witness flags present |
   public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<Transaction, Text> {
 
     var has_witness = false;
