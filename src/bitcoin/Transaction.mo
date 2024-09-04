@@ -450,7 +450,11 @@ module {
     };
 
     // Serialize transaction to bytes with layout:
-    // | version | witness flags if it is present | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |
+    // | version | witness flags if it is present | len(txIns) | txIns |
+    // len(txOuts) | txOuts | witnesses | locktime |
+    //
+    // This function is required to compute the transaction id if it contains a
+    // witness, since the id is a hash over the serialized transaction ignoring the witness.
     public func toBytesIgnoringWitness() : [Nat8] {
       // Serialize TxInputs to bytes.
       let serializedTxIns : [[Nat8]] = Array.map<TxInput.TxInput, [Nat8]>(
