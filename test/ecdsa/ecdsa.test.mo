@@ -2,10 +2,13 @@ import PublicKey "../../src/ecdsa/Publickey";
 import WycheproofEcdsaTestVectors "./wycheproofEcdsaSecp256k1TestVectors";
 import Hex "../Hex";
 import TestUtils "../TestUtils";
+import Jacobi "../../src/ec/Jacobi";
 import Curves "../../src/ec/Curves";
 import Ecdsa "../../src/ecdsa/Ecdsa";
+import Common "../../src/Common";
 import Der "../../src/ecdsa/Der";
 import Debug "mo:base/Debug";
+import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 
 type WycheproofEcdsaTestCase = WycheproofEcdsaTestVectors.WycheproofEcdsaTestCase;

@@ -2,7 +2,6 @@ import Iter "mo:base/Iter";
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Common "../src/Common";
-import {test} "mo:test";
 
 let testData : [{
   offset : Nat;
@@ -57,149 +56,108 @@ let testData : [{
   }
 ];
 
-test(
-  "readBE32",
-  func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
-      let currentData = testData[i];
-      let offset = currentData.offset;
+Debug.print("Common");
+
+do {
+  for (i in Iter.range(0, testData.size() - 1)) {
+    let currentData = testData[i];
+    let offset = currentData.offset;
+
+    do {
+      Debug.print("  readBE32");
       let expected = currentData.nat32;
       let actual = Common.readBE32(currentData.big32, offset);
-      assert (expected == actual);
+      assert(expected == actual);
     };
-  },
-);
 
-test(
-  "readBE64",
-  func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
-      let currentData = testData[i];
-      let offset = currentData.offset;
+    do {
+      Debug.print("  readBE64");
       let expected = currentData.nat64;
       let actual = Common.readBE64(currentData.big64, offset);
-      assert (expected == actual);
+      assert(expected == actual);
     };
-  },
-);
 
-test(
-  "readBE128",
-  func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
-      let currentData = testData[i];
-      let offset = currentData.offset;
+    do {
+      Debug.print("  readBE128");
       let expected = currentData.nat128;
       let actual = Common.readBE128(currentData.big128, offset);
-      assert (expected == actual);
+      assert(expected == actual);
     };
-  },
-);
 
-test(
-  "readBE256",
-  func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
-      let currentData = testData[i];
-      let offset = currentData.offset;
+    do {
+      Debug.print("  readBE256");
       let expected = currentData.nat256;
       let actual = Common.readBE256(currentData.big256, offset);
-      assert (expected == actual);
+      assert(expected == actual);
     };
-  },
-);
 
-test(
-  "writeBE32",
-  func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
-      let currentData = testData[i];
-      let offset = currentData.offset;
+    do {
+      Debug.print("  writeBE32");
+
       let output = Array.init<Nat8>(4, 0);
       let expected = Array.tabulate<Nat8>(4, func (i) {
         return currentData.big32[offset + i];
       });
       Common.writeBE32(output, 0, currentData.nat32);
-      assert (expected == Array.freeze(output));
     };
-  },
-);
 
-test(
-  "writeBE64",
-  func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
-      let currentData = testData[i];
-      let offset = currentData.offset;
+    do {
+      Debug.print("  writeBE64");
+
       let output = Array.init<Nat8>(8, 0);
       let expected = Array.tabulate<Nat8>(8, func (i) {
         return currentData.big64[offset + i];
       });
       Common.writeBE64(output, 0, currentData.nat64);
-      assert (expected == Array.freeze(output));
     };
-  },
-);
 
-test(
-  "writeBE128",
-  func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
-      let currentData = testData[i];
-      let offset = currentData.offset;
+    do {
+      Debug.print("  writeBE128");
+
       let output = Array.init<Nat8>(16, 0);
       let expected = Array.tabulate<Nat8>(16, func (i) {
         return currentData.big128[offset + i];
       });
       Common.writeBE128(output, 0, currentData.nat128);
-      assert (expected == Array.freeze(output));
     };
-  },
-);
 
-test(
-  "writeBE256",
-  func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
-      let currentData = testData[i];
-      let offset = currentData.offset;
+    do {
+      Debug.print("  writeBE256");
+
       let output = Array.init<Nat8>(32, 0);
       let expected = Array.tabulate<Nat8>(32, func (i) {
         return currentData.big256[offset + i];
       });
       Common.writeBE256(output, 0, currentData.nat256);
-      assert (expected == Array.freeze(output));
     };
-  },
-);
+  };
+};
 
-test(
-  "textToNat",
-  func() {
-    let testData : [(Text, ?Nat)] = [
-      ("0", ?0),
-      ("1", ?1),
-      ("2", ?2),
-      ("12345", ?12345),
-      ("55555", ?55555),
-      ("299999999", ?299999999),
-      ("0xff", null),
-      ("  ", null),
-      ("  l", null),
-      ("1  l", null),
-      ("1  ", null),
-      ("abc", null),
-      ("1abc", null),
-      ("abc1", null),
-      ("/5", null),
-      ("5/", null),
-      (":5", null),
-      ("5:", null),
-    ];
+do {
+  Debug.print("  Text to Nat");
+  let testData : [(Text, ?Nat)] = [
+    ("0", ?0),
+    ("1", ?1),
+    ("2", ?2),
+    ("12345", ?12345),
+    ("55555", ?55555),
+    ("299999999", ?299999999),
+    ("0xff", null),
+    ("  ", null),
+    ("  l", null),
+    ("1  l", null),
+    ("1  ", null),
+    ("abc", null),
+    ("1abc", null),
+    ("abc1", null),
+    ("/5", null),
+    ("5/", null),
+    (":5", null),
+    ("5:", null),
+  ];
 
-    for ((input, output) in testData.vals()) {
-      let actual = Common.textToNat(input);
-      assert(actual == output);
-    };
-  },
-);
+  for ((input, output) in testData.vals()) {
+    let actual = Common.textToNat(input);
+    assert(actual == output);
+  };
+};

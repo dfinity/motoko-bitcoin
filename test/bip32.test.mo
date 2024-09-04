@@ -1,6 +1,7 @@
 import Bip32 "../src/Bip32";
+import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
-import {test} "mo:test";
+import TestUtils "./TestUtils";
 
 type DerivationVector = {
   xPublicKey : Text;
@@ -237,29 +238,24 @@ func testRelativeDerivation(vector : DerivationVector) {
   }) != null);
 };
 
-test(
-  "Derivation vectors",
-  func() {
-    for (derivationVector in Iter.fromArray(derivationVectors)) {
-      testDerivations(derivationVector);
-    };
-  },
-);
+Debug.print("Bip32");
 
-test(
-  "Handling of invalid serializations",
-  func() {
-    for (invalidDataVector in Iter.fromArray(parseInvalidDataVectors)) {
-      testParseInvalidData(invalidDataVector);
-    };
-  },
-);
+let runTest = TestUtils.runTestWithDefaults;
 
-test(
-  "Derivation vectors",
-  func() {
-    for (relativeDerivationVector in Iter.fromArray(relativeDerivationVectors)) {
-      testRelativeDerivation(relativeDerivationVector);
-    };
-  },
-);
+runTest({
+  title = "Derivation Vectors";
+  fn = testDerivations;
+  vectors = derivationVectors;
+});
+
+runTest({
+  title = "Handling of Invalid Serializations";
+  fn = testParseInvalidData;
+  vectors = parseInvalidDataVectors;
+});
+
+runTest({
+  title = "Relative derivation";
+  fn = testRelativeDerivation;
+  vectors = relativeDerivationVectors;
+});
