@@ -1,11 +1,13 @@
 import Array "mo:base/Array";
-import SHA256Digest "../motoko-sha/src/SHA256";
-import SHA512Digest "../motoko-sha/src/SHA512";
+import Blob "mo:base/Blob";
+import Sha256 "mo:sha2/Sha256";
+import Sha512 "mo:sha2/Sha512";
+
 
 module {
   public type Digest = {
-    write : ([Nat8]) -> () ;
-    sum : () -> [Nat8];
+    writeArray : ([Nat8]) -> ();
+    sum : () -> Blob;
   };
 
   public type DigestFactory = {
@@ -14,21 +16,21 @@ module {
   };
 
   public type Hmac = {
-    write : ([Nat8]) -> ();
-    sum : () -> [Nat8];
+    writeArray : ([Nat8]) -> ();
+    sum : () -> Blob;
   };
 
   // Sha256 support.
   object sha256DigestFactory {
     public let blockSize : Nat = 64;
-    public func create () : Digest = SHA256Digest.Digest();
+    public func create () : Digest = Sha256.Digest(#sha256);
   };
   public func sha256(key: [Nat8]) : Hmac = HmacImpl(key, sha256DigestFactory);
 
   // Sha512 support.
   object sha512DigestFactory {
     public let blockSize : Nat = 128;
-    public func create () : Digest = SHA512Digest.Digest();
+    public func create () : Digest = Sha512.Digest(#sha512);
   };
   public func sha512(key: [Nat8]) : Hmac = HmacImpl(key, sha512DigestFactory);
 
@@ -61,8 +63,8 @@ module {
       } else {
         // key' = H(key) + [0x00] * (blockSize - key.size())
         let keyDigest : Digest = digestFactory.create();
-        keyDigest.write(key);
-        let keyHash = keyDigest.sum();
+        keyDigest.writeArray(key);
+        let keyHash = Blob.toArray(keyDigest.sum());
 
         Array.tabulate<Nat8>(blockSize, func(i) {
             if (i < keyHash.size()) {
@@ -77,22 +79,22 @@ module {
       let outerPaddedKey = Array.map<Nat8, Nat8>(blockSizedKey, func(byte) {
         byte ^ outerPad;
       });
-      outerDigest.write(outerPaddedKey);
+      outerDigest.writeArray(outerPaddedKey);
 
       // H(key' ^ innerPad)
       let innerPaddedKey = Array.map<Nat8, Nat8>(blockSizedKey, func(byte) {
         byte ^ innerPad;
       });
-      innerDigest.write(innerPaddedKey);
+      innerDigest.writeArray(innerPaddedKey);
     };
 
-    public func write(data : [Nat8]) {
-      innerDigest.write(data);
+    public func writeArray(data : [Nat8]) {
+      innerDigest.writeArray(data);
     };
 
-    public func sum() : [Nat8] {
-      let innerHash = innerDigest.sum();
-      outerDigest.write(innerHash);
+    public func sum() : Blob {
+      let innerHash = Blob.toArray(innerDigest.sum());
+      outerDigest.writeArray(innerHash);
       return outerDigest.sum();
     };
   };
