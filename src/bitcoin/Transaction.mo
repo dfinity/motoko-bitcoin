@@ -152,9 +152,9 @@ module {
     public let witnesses : [var Witness.Witness] = _witnesses;
 
     // Compute the transaction double hashing the transaction and reversing the
-    // output.
+    // output. The id does not include the witness if it's present.
     public func id() : [Nat8] {
-      let doubleHash : [Nat8] = Hash.doubleSHA256(toBytes());
+      let doubleHash : [Nat8] = Hash.doubleSHA256(toBytesIgnoringWitness());
       return Array.tabulate<Nat8>(
         doubleHash.size(),
         func(n : Nat) {
@@ -294,7 +294,7 @@ module {
     };
 
     // Serialize transaction to bytes with layout:
-    // | version | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |
+    // | version | witness flags if it is present | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |
     public func toBytes() : [Nat8] {
       let has_non_empty_witness = Array.foldLeft<Witness.Witness, Bool>(
         Array.freeze(witnesses),
@@ -438,6 +438,117 @@ module {
         serializedWitnesses.size(),
       );
       outputOffset += serializedWitnesses.size();
+
+      // Write locktime.
+      Common.writeLE32(output, outputOffset, locktime);
+      outputOffset += 4;
+
+      assert (outputOffset == output.size());
+      let result = Array.freeze(output);
+      result;
+    };
+
+    // Serialize transaction to bytes with layout:
+    // | version | witness flags if it is present | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |
+    public func toBytesIgnoringWitness() : [Nat8] {
+      // Serialize TxInputs to bytes.
+      let serializedTxIns : [[Nat8]] = Array.map<TxInput.TxInput, [Nat8]>(
+        txInputs,
+        func(txInput) {
+          txInput.toBytes();
+        },
+      );
+
+      // Serialize TxOutputs to bytes.
+      let serializedTxOuts : [[Nat8]] = Array.map<TxOutput.TxOutput, [Nat8]>(
+        txOutputs,
+        func(txOutput) {
+          txOutput.toBytes();
+        },
+      );
+
+      // Encode the sizes of TxIns and TxOuts as varint.
+      let serializedTxInSize : [Nat8] = ByteUtils.writeVarint(txInputs.size());
+      let serializedTxOutSize : [Nat8] = ByteUtils.writeVarint(
+        txOutputs.size()
+      );
+
+      // Compute total size of all serialized TxInputs.
+      let totalTxInSize : Nat = Array.foldLeft<[Nat8], Nat>(
+        serializedTxIns,
+        0,
+        func(total : Nat, serializedTxIn : [Nat8]) {
+          total + serializedTxIn.size();
+        },
+      );
+
+      // Compute total size of all serialized TxOutputs.
+      let totalTxOutSize : Nat = Array.foldLeft<[Nat8], Nat>(
+        serializedTxOuts,
+        0,
+        func(total : Nat, serializedTxOut : [Nat8]) {
+          total + serializedTxOut.size();
+        },
+      );
+
+      // Total size of output excluding sigHashType.
+      let totalSize : Nat =
+      // 4 bytes for version.
+      4
+      // transaction inputs and outputs
+      + serializedTxInSize.size() + totalTxInSize + serializedTxOutSize.size() + totalTxOutSize
+      // 4 bytes for locktime.
+      + 4;
+      let output = Array.init<Nat8>(totalSize, 0);
+      var outputOffset = 0;
+
+      // Write version.
+      Common.writeLE32(output, outputOffset, version);
+      outputOffset += 4;
+
+      // Write TxInputs size.
+      Common.copy(
+        output,
+        outputOffset,
+        serializedTxInSize,
+        0,
+        serializedTxInSize.size(),
+      );
+      outputOffset += serializedTxInSize.size();
+
+      // Write serialized TxInputs.
+      for (serializedTxIn in serializedTxIns.vals()) {
+        Common.copy(
+          output,
+          outputOffset,
+          serializedTxIn,
+          0,
+          serializedTxIn.size(),
+        );
+        outputOffset += serializedTxIn.size();
+      };
+
+      // Write TxOutputs size.
+      Common.copy(
+        output,
+        outputOffset,
+        serializedTxOutSize,
+        0,
+        serializedTxOutSize.size(),
+      );
+      outputOffset += serializedTxOutSize.size();
+
+      // Write serialized TxOutputs.
+      for (serializedTxOut in serializedTxOuts.vals()) {
+        Common.copy(
+          output,
+          outputOffset,
+          serializedTxOut,
+          0,
+          serializedTxOut.size(),
+        );
+        outputOffset += serializedTxOut.size();
+      };
 
       // Write locktime.
       Common.writeLE32(output, outputOffset, locktime);
