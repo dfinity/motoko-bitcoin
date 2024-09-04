@@ -18,9 +18,9 @@ module {
   // count describes the number of times to run the test. This is mainly
   // intended for facilitating benchmarking.
   // `verbose` makes the test runner indicate the item it is operating on. This
-  // can be used to determine which failing 
+  // can be used to determine which failing
   type TestOptions = {
-    count: Nat;
+    count : Nat;
     verbose : Bool;
   };
 

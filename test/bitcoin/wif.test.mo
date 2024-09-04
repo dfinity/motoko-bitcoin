@@ -1,7 +1,5 @@
 import Wif "../../src/bitcoin/Wif";
 import TestUtils "../TestUtils";
-import Debug "mo:base/Debug";
-
 
 type ValidWifTestCase = {
   wif : Text;
@@ -109,7 +107,7 @@ func testValidWifDecode(tcase : ValidWifTestCase) {
 
 func testInvalidWifDecode(tcase : InvalidWifTestCase) {
   switch (Wif.decode(tcase.wif)) {
-    case (#ok (privateKey)) {
+    case (#ok (_privateKey)) {
       assert(false);
     };
     case _ {

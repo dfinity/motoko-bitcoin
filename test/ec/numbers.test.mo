@@ -1,6 +1,4 @@
 import Numbers "../../src/ec/Numbers";
-import Debug "mo:base/Debug";
-import Iter "mo:base/Iter";
 import TestUtils "../TestUtils";
 
 type EeaTestVector = {
@@ -167,8 +165,6 @@ func testToNaf({input; expected} : ToNafTestVector) {
   let actual = Numbers.toNaf(input);
   assert(expected == actual);
 };
-
-Debug.print("Numbers Test");
 
 let runTest = TestUtils.runTestWithDefaults;
 
