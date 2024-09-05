@@ -17,6 +17,7 @@ import Witness "Witness";
 import Sha256 "mo:sha2/Sha256";
 
 module {
+  let SHA256_BYTE_LEN : Nat = 32;
 
   // Deserialize transaction from data with the following layout:
   // | version | maybe witness flags | len(txIns) | txIns | len(txOuts) | txOuts
@@ -205,6 +206,24 @@ module {
       scriptPubKey : Script.Script,
       txInputIndex : Nat32,
     ) : [Nat8] {
+      createTaprootSignatureHash(amounts, scriptPubKey, txInputIndex, null);
+    };
+
+    public func createTaprootScriptSpendSignatureHash(
+      amounts : [Nat64],
+      scriptPubKey : Script.Script,
+      txInputIndex : Nat32,
+      leaf_hash : [Nat8],
+    ) : [Nat8] {
+      createTaprootSignatureHash(amounts, scriptPubKey, txInputIndex, ?leaf_hash);
+    };
+
+    func createTaprootSignatureHash(
+      amounts : [Nat64],
+      scriptPubKey : Script.Script,
+      txInputIndex : Nat32,
+      maybe_leaf_hash : ?[Nat8],
+    ) : [Nat8] {
       let prevouts = Array.map<TxInput.TxInput, [Nat8]>(
         txInputs,
         func(txin) {
@@ -270,12 +289,22 @@ module {
 
       let sha_outputs : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, outputs_bytes));
 
-      // (ext_flag * 2) + annex_present
-      let spend_type : [Nat8] = [0x00];
-
       var input_index_buffer = Array.init<Nat8>(4, 0);
       Common.writeLE32(input_index_buffer, 0, txInputIndex);
       let input_index = Array.freeze(input_index_buffer);
+
+      // spend_type = (ext_flag * 2) + annex_present
+      let (spend_type, scriptpath_bytes) : ([Nat8], [Nat8]) = switch (maybe_leaf_hash) {
+        case (?leaf_hash) {
+          assert leaf_hash.size() == SHA256_BYTE_LEN;
+          let KEY_VERSION_0 : [Nat8] = [0x00];
+          let OP_SEPARATOR_POS : [Nat8] = [0xFF, 0xFF, 0xFF, 0xFF];
+          ([0x02], Array.flatten([leaf_hash, KEY_VERSION_0, OP_SEPARATOR_POS]));
+        };
+        case (null) {
+          ([0x00], []);
+        };
+      };
 
       let data = Array.flatten<Nat8>([
         epoch,
@@ -289,6 +318,7 @@ module {
         sha_outputs,
         spend_type,
         input_index,
+        scriptpath_bytes,
       ]);
 
       return Hash.taggedHash(data, "TapSighash");
