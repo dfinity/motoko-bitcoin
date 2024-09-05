@@ -22,13 +22,13 @@ module {
 
     public let version : Nat32 = 2;
 
-    public class TestCase(_output_0 : Types.Satoshi, _output_1 : Types.Satoshi, _expectedSigHashes : [[Nat8]], _expectedScriptSpendSigHashes : [[Nat8]], _expectedSerializedTransaction : [Nat8], _expectedTransactionId : [Nat8]) {
+    public class TestCase(_output_0 : Types.Satoshi, _output_1 : Types.Satoshi, _expectedKeySpendSigHashes : [[Nat8]], _expectedScriptSpendSigHashes : [[Nat8]], _expectedSerializedTransaction : [Nat8], _expectedTransactionId : [Nat8]) {
         public let output_0 : Types.Satoshi = _output_0;
         public let output_1 : Types.Satoshi = _output_1;
-        public let expectedSigHashes : [[Nat8]] = _expectedSigHashes;
+        public let expectedKeySpendSigHashes : [[Nat8]] = _expectedKeySpendSigHashes;
         public let expectedScriptSpendSigHashes : [[Nat8]] = _expectedScriptSpendSigHashes;
 
-        public let numInputs : Nat = Array.size(expectedSigHashes);
+        public let numInputs : Nat = Array.size(expectedKeySpendSigHashes);
         assert numInputs > 0;
 
         public let expectedSerializedTransaction : [Nat8] = _expectedSerializedTransaction;
@@ -169,7 +169,7 @@ module {
             );
         };
 
-        public func sigHashes() : [[Nat8]] {
+        public func keySpendSigHashes() : [[Nat8]] {
             // `moc` doesn't let us use `transaction` as a name with [M0097] error.
             let _transaction : Transaction.Transaction = transaction();
             let sigHashes = Array.init<[Nat8]>(numInputs, []);
@@ -201,9 +201,9 @@ module {
             Array.freeze(sigHashes);
         };
 
-        public func signedTransaction() : Transaction.Transaction {
+        public func keySpendSignedTransaction() : Transaction.Transaction {
             // `moc` doesn't let us use same names for functions and local vars with [M0097] error.
-            let _sigHashes = Array.thaw<[Nat8]>(sigHashes());
+            let _sigHashes = Array.thaw<[Nat8]>(keySpendSigHashes());
             let _transaction : Transaction.Transaction = transaction();
 
             let signatureByteLength = 64;
