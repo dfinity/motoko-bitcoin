@@ -1,4 +1,7 @@
+import Common "../Common";
+import Curves "../ec/Curves";
 import Ecdsa "../ecdsa/Ecdsa";
+import Fp "../ec/Fp";
 import Hash "../Hash";
 import Result "mo:base/Result";
 import Array "mo:base/Array";
@@ -6,9 +9,14 @@ import Nat "mo:base/Nat";
 import Script "./Script";
 import Segwit "../Segwit";
 import Types "./Types";
+import Affine "../ec/Affine";
+import Jacobi "../ec/Jacobi";
 
 module {
-    type PublicKey = Ecdsa.PublicKey;
+    type PublicKey = {
+        bip340_public_key : [Nat8];
+        is_even : Bool;
+    };
     type Script = Script.Script;
 
     public type P2trKeyAddress = Types.P2trKeyAddress;
@@ -52,5 +60,58 @@ module {
         let TAPROOT_LEAF_TAPSCRIPT : [Nat8] = [0xc0];
         let script_bytes = Script.toBytes(leaf_script);
         Hash.taggedHash(Array.flatten([TAPROOT_LEAF_TAPSCRIPT, script_bytes]), "TapLeaf");
+    };
+
+    public func tweakFromKeyAndHash(internal_key : [Nat8], hash : [Nat8]) : Result.Result<Fp.Fp, Text> {
+        if (internal_key.size() != 32) {
+            return #err("Failed to compute tweak, invalid internal key length: expected 32 but got " # Nat.toText(internal_key.size()));
+        } else if (hash.size() != 32) {
+            return #err("Failed to compute tweak, invalid hash length: expected 32 but got " # Nat.toText(hash.size()));
+        };
+
+        let tagged_hash = Hash.taggedHash(Array.flatten([internal_key, hash]), "TapTweak");
+
+        let tweak = Common.readBE256(tagged_hash, 0);
+
+        if (tweak >= Curves.secp256k1.p) {
+            return #err("Failed to compute tweak, tweak is not smaller than the curve order");
+        };
+
+        #ok(Curves.secp256k1.Fp(tweak));
+    };
+
+    public func tweakPublicKey(public_key_bip340_bytes : [Nat8], tweak : Fp.Fp) : Result.Result<PublicKey, Text> {
+        let even_point_flag : [Nat8] = [0x02];
+        let public_key_sec1_bytes = Array.flatten([even_point_flag, public_key_bip340_bytes]);
+        let public_key_point = switch (Jacobi.fromBytes(public_key_sec1_bytes, Curves.secp256k1)) {
+            case (?point) {
+                switch (point) {
+                    case (#infinity _) {
+                        return #err("Failed to tweak public key, invalid public key");
+                    };
+                    case (_) {};
+                };
+                point;
+            };
+            case (null) {
+                return #err("Failed to tweak public key, invalid public key");
+            };
+        };
+
+        let tweak_point = Jacobi.mulBase(tweak.value, Curves.secp256k1);
+
+        let tweaked_public_key = Jacobi.add(public_key_point, tweak_point);
+
+        if (not Jacobi.isOnCurve(tweaked_public_key) or Jacobi.isInfinity(tweaked_public_key)) {
+            return #err("Tweaking produced an invalid public key");
+        };
+
+        let tweaked_public_key_sec1_bytes = Jacobi.toBytes(tweaked_public_key, true);
+        #ok(
+            {
+                bip340_public_key = Array.subArray(tweaked_public_key_sec1_bytes, 1, 32);
+                is_even = tweaked_public_key_sec1_bytes[0] == 0x02;
+            }
+        );
     };
 };
