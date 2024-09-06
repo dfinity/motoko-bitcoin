@@ -128,7 +128,7 @@ module {
                 };
             };
 
-            switch (P2tr.makeP2trLeafScript(bip340_public_key)) {
+            switch (P2tr.leafScript(bip340_public_key)) {
                 case (#ok(script)) {
                     script;
                 };

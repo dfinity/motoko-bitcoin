@@ -35,7 +35,7 @@ module {
     };
 
     // Create script for the given P2TR key spend address.
-    public func makeP2trLeafScript(bip340_spender_public_key : [Nat8]) : Result.Result<Script, Text> {
+    public func leafScript(bip340_spender_public_key : [Nat8]) : Result.Result<Script, Text> {
         if (bip340_spender_public_key.size() != 32) {
             return #err("Invalid BIP-340 public key length: expected 32 but got " # Nat.toText(bip340_spender_public_key.size()));
         };
