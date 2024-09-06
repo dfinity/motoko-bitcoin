@@ -2,7 +2,7 @@
 
 ## Testing
 
-Pull dependencies
+Requires the [`mops`](https://docs.mops.one/quick-start) package manager for Motoko.
 
 ```
 git submodule update --init
@@ -11,7 +11,7 @@ git submodule update --init
 Run all tests
 
 ```
-make test
+mops test --mode wasi
 ```
 
 ## Usage

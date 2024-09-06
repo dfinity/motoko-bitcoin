@@ -10,6 +10,7 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Buffer "mo:base/Buffer";
 import Nat32 "mo:base/Nat32";
+import Blob "mo:base/Blob";
 
 module {
   public type Path = {
@@ -217,8 +218,8 @@ module {
       Common.copy(hmacData, 0, key, 0, 33);
       Common.writeBE32(hmacData, 33, index);
       let hmacSha512 : Hmac.Hmac = Hmac.sha512(chaincode);
-      hmacSha512.write(Array.freeze(hmacData));
-      let fullNode : [Nat8] = hmacSha512.sum();
+      hmacSha512.writeArray(Array.freeze(hmacData));
+      let fullNode : [Nat8] = Blob.toArray(hmacSha512.sum());
 
       // Split HMAC output into two 32-byte sequences.
       let left : [Nat8] = Array.tabulate<Nat8>(32, func (i) {
