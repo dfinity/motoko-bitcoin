@@ -1,5 +1,5 @@
 module {
-   // A single unit of Bitcoin.
+  // A single unit of Bitcoin.
   public type Satoshi = Nat64;
 
   // The type of Bitcoin network.
@@ -35,8 +35,12 @@ module {
   };
 
   public type P2PkhAddress = Text;
+  public type P2trKeyAddress = Text;
+  public type P2trScriptAddress = Text;
 
   public type Address = {
     #p2pkh : P2PkhAddress;
+    #p2tr_key : P2trKeyAddress;
+    #p2tr_script : P2trScriptAddress;
   };
 };

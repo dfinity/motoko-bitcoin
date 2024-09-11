@@ -2,8 +2,8 @@ import Fp "../ec/Fp";
 import Jacobi "../ec/Jacobi";
 import Common "../Common";
 import Types "./Types";
-import Sha256 "mo:sha2/Sha256";
 import Blob "mo:base/Blob";
+import Sha256 "mo:sha2/Sha256";
 
 module {
   public type Signature = Types.Signature;

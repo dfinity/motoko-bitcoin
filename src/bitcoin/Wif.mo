@@ -9,7 +9,7 @@ module {
   public type WifPrivateKey = Text;
 
   // Map network to WIF version prefix.
-  func encodeVersion(network : Types.Network) : Nat8 {
+  func _encodeVersion(network : Types.Network) : Nat8 {
     return switch (network) {
       case (#Mainnet) {
         0x80;
@@ -59,7 +59,7 @@ module {
       case (?version, ?data, null, null) {
         (version, data, false)
       };
-      case (_, _, ?(compressionFlag), _) {
+      case (_, _, ?(_compressionFlag), _) {
         return #err ("Invalid compression flag.");
       };
       case _ {

@@ -1,6 +1,6 @@
 import Array "mo:base/Array";
-import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
+import Iter "mo:base/Iter";
 import Sha256 "mo:sha2/Sha256";
 import Base58 "./Base58";
 

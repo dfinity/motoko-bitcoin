@@ -1,5 +1,3 @@
-import Nat "mo:base/Nat";
-import Iter "mo:base/Iter";
 import Debug "mo:base/Debug";
 import Hash "../../src/Hash";
 import TestUtils "../TestUtils";
@@ -7,7 +5,6 @@ import Curves "../../src/ec/Curves";
 import Script "../../src/bitcoin/Script";
 import P2pkh "../../src/bitcoin/P2pkh";
 import Types "../../src/bitcoin/Types";
-import PublicKey "../../src/ecdsa/Publickey";
 
 type AddressTestCase = {
   key : [Nat8];
