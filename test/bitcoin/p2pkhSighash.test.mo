@@ -1,7 +1,7 @@
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Int32 "mo:base/Int32";
-import TestCases "./sighashTestVectors";
+import TestCases "./p2pkhSighashTestVectors";
 import TestUtils "../TestUtils";
 import Hex "../Hex";
 import Script "../../src/bitcoin/Script";
@@ -26,7 +26,7 @@ func test(tcase : TestCase) {
   };
 
   if (tcase.witness) {
-    // Skip not supported witness version.
+    // Skip not supported P2WPKH.
     return;
   };
 
@@ -64,7 +64,7 @@ func test(tcase : TestCase) {
 
   assert(tx.toBytes() == txData);
 
-  let actualSighash = tx.createSignatureHash(script, tcase.inputIndex, hashType);
+  let actualSighash = tx.createP2pkhSignatureHash(script, tcase.inputIndex, hashType);
   assert(expectedResult == actualSighash);
 };
 

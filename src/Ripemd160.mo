@@ -57,9 +57,9 @@ module {
 
     private func round(
       a : Nat32,
-      b : Nat32,
+      _b : Nat32,
       c : Nat32,
-      d : Nat32,
+      _d : Nat32,
       e : Nat32,
       f : Nat32,
       x : Nat32,

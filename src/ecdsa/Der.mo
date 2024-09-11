@@ -2,7 +2,6 @@ import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
-import Nat32 "mo:base/Nat32";
 import Array "mo:base/Array";
 import Buffer "mo:base/Buffer";
 import Blob "mo:base/Blob";
@@ -45,7 +44,7 @@ module {
         };
       };
 
-      return outputBuf.toArray();
+      return Buffer.toArray(outputBuf);
     };
 
     let output = Buffer.Buffer<Nat8>(0);
@@ -89,7 +88,7 @@ module {
       output.add(i);
     };
 
-    return Blob.fromArray(output.toArray());
+    return Blob.fromArray(Buffer.toArray(output));
   };
 
   // Accepts a Blob containing the concatenation of the 32-byte big endian

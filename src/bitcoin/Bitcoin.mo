@@ -8,12 +8,11 @@ import Nat8 "mo:base/Nat8";
 import Transaction "./Transaction";
 import Der "../ecdsa/Der";
 import Script "./Script";
-import EcdsaTypes "../ecdsa/Types";
-import PublicKey "../ecdsa/Publickey";
 import TxInput "./TxInput";
 import TxOutput "./TxOutput";
 import Address "./Address";
 import Types "./Types";
+import Witness "./Witness";
 
 module {
   type Utxo = Types.Utxo;
@@ -40,12 +39,15 @@ module {
   // `changeAddress` is an address to return any remaining amount to.
   // `fees` indicate the transaction fees.
   public func buildTransaction(
-    version : Nat32, utxos : [Utxo], destinations : [(Types.Address, Satoshi)],
-    changeAddress : Types.Address, fees : Satoshi)
-    : Result.Result<Transaction.Transaction, Text> {
+    version : Nat32,
+    utxos : [Utxo],
+    destinations : [(Types.Address, Satoshi)],
+    changeAddress : Types.Address,
+    fees : Satoshi,
+  ) : Result.Result<Transaction.Transaction, Text> {
 
     if (version != 1 and version != 2) {
-      return #err ("Unexpected version number: " # Nat32.toText(version))
+      return #err("Unexpected version number: " # Nat32.toText(version));
     };
 
     // Collect TxOutputs, making space for a potential extra output for change.
@@ -99,17 +101,26 @@ module {
       };
     };
 
-    return #ok (Transaction.Transaction(version,
-      txInputs.toArray(), txOutputs.toArray(), 0));
+    return #ok(
+      Transaction.Transaction(
+        version,
+        Buffer.toArray(txInputs),
+        Buffer.toArray(txOutputs),
+        Array.init<Witness.Witness>(txInputs.size(), Witness.EMPTY_WITNESS),
+        0,
+      )
+    );
   };
 
   // Sign given transaction.
   // `sourceAddress` is the spender's address appearing in the TxOutputs being
   // spent from.
   // `ecdsaProxy` is an interface providing ecdsa signing functionality.
-  public func signTransaction(sourceAddress : Types.Address,
-    transaction : Transaction.Transaction, ecdsaProxy : EcdsaProxy,
-    derivationPath : [Blob]
+  public func signP2pkhTransaction(
+    sourceAddress : Types.Address,
+    transaction : Transaction.Transaction,
+    ecdsaProxy : EcdsaProxy,
+    derivationPath : [Blob],
   ) : Result.Result<Transaction.Transaction, Text> {
 
     // Obtain the scriptPubKey of the source address which is also the
@@ -118,40 +129,49 @@ module {
       case (#ok scriptPubKey) {
         // Obtain scriptSigs for each Tx input.
         let scriptSigs = Array.tabulate<Script.Script>(
-          transaction.txInputs.size(), func (i) {
-            let sighash : [Nat8] = transaction.createSignatureHash(
-              scriptPubKey, Nat32.fromIntWrap(i), Types.SIGHASH_ALL);
-              let signature : Blob = ecdsaProxy.sign(
-                Blob.fromArray(sighash), derivationPath);
-              let encodedSignature : [Nat8] = Blob.toArray(
-                Der.encodeSignature(signature));
-              // Append the sighash type.
-              let encodedSignatureWithSighashType = Array.tabulate<Nat8>(
-                encodedSignature.size() + 1, func (n) {
-                  if (n < encodedSignature.size()) {
-                    encodedSignature[n]
-                  } else {
-                    Nat8.fromNat(Nat32.toNat(Types.SIGHASH_ALL))
-                  };
-              });
+          transaction.txInputs.size(),
+          func(i) {
+            let sighash : [Nat8] = transaction.createP2pkhSignatureHash(
+              scriptPubKey,
+              Nat32.fromIntWrap(i),
+              Types.SIGHASH_ALL,
+            );
+            let signature : Blob = ecdsaProxy.sign(
+              Blob.fromArray(sighash),
+              derivationPath,
+            );
+            let encodedSignature : [Nat8] = Blob.toArray(
+              Der.encodeSignature(signature)
+            );
+            // Append the sighash type.
+            let encodedSignatureWithSighashType = Array.tabulate<Nat8>(
+              encodedSignature.size() + 1,
+              func(n) {
+                if (n < encodedSignature.size()) {
+                  encodedSignature[n];
+                } else {
+                  Nat8.fromNat(Nat32.toNat(Types.SIGHASH_ALL));
+                };
+              },
+            );
 
             // Create Script Sig which looks like:
             // ScriptSig = <Signature> <Public Key>.
             [
               #data encodedSignatureWithSighashType,
-              #data (Blob.toArray(ecdsaProxy.publicKey().0))
-            ]
-          }
+              #data(Blob.toArray(ecdsaProxy.publicKey().0)),
+            ];
+          },
         );
         // Assign ScriptSigs to their associated TxInputs.
         for (i in Iter.range(0, scriptSigs.size() - 1)) {
           transaction.txInputs[i].script := scriptSigs[i];
         };
 
-        #ok transaction
+        #ok transaction;
       };
       case (#err msg) {
-        #err msg
+        #err msg;
       };
     };
   };
@@ -167,19 +187,31 @@ module {
   // transfer to each address.
   // `changeAddress` is an address to return any remaining amount to.
   // `fees` indicate the transaction fees.
-  public func createSignedTransaction(
-    sourceAddress : Types.Address, ecdsaProxy : EcdsaProxy,
-    derivationPath : [Blob], version : Nat32, utxos : [Utxo],
-    destinations : [(Types.Address, Satoshi)], changeAddress : Types.Address,
-    fees : Satoshi) : Result.Result<Transaction.Transaction, Text> {
+  public func createSignedP2pkhTransaction(
+    sourceAddress : Types.Address,
+    ecdsaProxy : EcdsaProxy,
+    derivationPath : [Blob],
+    version : Nat32,
+    utxos : [Utxo],
+    destinations : [(Types.Address, Satoshi)],
+    changeAddress : Types.Address,
+    fees : Satoshi,
+  ) : Result.Result<Transaction.Transaction, Text> {
 
-    return switch (buildTransaction(version, utxos, destinations,
-      changeAddress, fees)) {
+    return switch (
+      buildTransaction(
+        version,
+        utxos,
+        destinations,
+        changeAddress,
+        fees,
+      )
+    ) {
       case (#ok transaction) {
-        signTransaction(sourceAddress, transaction, ecdsaProxy, derivationPath)
+        signP2pkhTransaction(sourceAddress, transaction, ecdsaProxy, derivationPath);
       };
       case (#err msg) {
-        #err msg
+        #err msg;
       };
     };
   };
