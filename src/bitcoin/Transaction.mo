@@ -34,14 +34,16 @@ module {
       };
     };
 
-    // Read version and number of transaction inputs.
     // There are 2 possible layouts:
     // 1. No witness:
     // | version | txInSize | txIns | txOutSize | txOuts | locktime |
     // 2. Witness:
-    // | version | 0x00 marker | 0x01 flag | txInSize | txIns | txOutSize | txOuts | locktime |
-    //  The marker makes the transaction look like a transactio with 0 inputs
-    //  if interpreted as "no witness".
+    //    | version | 0x00 marker | 0x01 flag | txInSize | txIns | txOutSize |
+    //    txOuts | witness | locktime |
+    // The marker makes the transaction look like a transaction with 0 inputs
+    // if interpreted as "no witness".
+    // See [BIP141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)
+    // for more details.
     //
     // Note: txInSize and txOutSize are the numbers of inputs and outputs and
     // not their actual size in bytes.
@@ -152,9 +154,15 @@ module {
     public let txOutputs : [TxOutput.TxOutput] = _txOuts;
     public let witnesses : [var Witness.Witness] = _witnesses;
 
-    // Compute the transaction double hashing the transaction and reversing the
-    // output. The id does not include the witness if it's present.
-    public func id() : [Nat8] {
+    /// Compute the transaction id by double hashing
+    /// `| version | txInSize | txIns | txOutSize | txOuts | locktime |`
+    /// and reversing the output.
+    ///
+    /// The txid does not include the witness if it's present.
+    /// As per
+    /// [BIP141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki),
+    /// the id that includes witness is denoted as wtxid.
+    public func txid() : [Nat8] {
       let doubleHash : [Nat8] = Hash.doubleSHA256(toBytesIgnoringWitness());
       return Array.tabulate<Nat8>(
         doubleHash.size(),
@@ -200,6 +208,12 @@ module {
       return Hash.doubleSHA256(Array.freeze(output));
     };
 
+    /// Create a P2TR key spend signature hash for this transaction. This is
+    /// computed for each transaction input separately. This function takes in
+    /// the `amounts` of the outputs being spent, the `scriptPubKey` of the spender
+    /// address and the `txInputIndex` of the input being signed. The full signature
+    /// hash computation algorithm is described in
+    /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#user-content-Signature_validation_rules).
     public func createTaprootKeySpendSignatureHash(
       amounts : [Nat64],
       scriptPubKey : Script.Script,
@@ -294,8 +308,8 @@ module {
       return Hash.taggedHash(data, "TapSighash");
     };
 
-    // Serialize transaction to bytes with layout:
-    // | version | witness flags if it is present | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |
+    /// Serialize transaction to bytes with layout:
+    /// `| version | witness flags if it is present | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |`
     public func toBytes() : [Nat8] {
       let has_non_empty_witness = Array.foldLeft<Witness.Witness, Bool>(
         Array.freeze(witnesses),
@@ -449,12 +463,14 @@ module {
       result;
     };
 
-    // Serialize transaction to bytes with layout:
-    // | version | witness flags if it is present | len(txIns) | txIns |
-    // len(txOuts) | txOuts | witnesses | locktime |
-    //
-    // This function is required to compute the transaction id if it contains a
-    // witness, since the id is a hash over the serialized transaction ignoring the witness.
+    /// Serialize transaction to bytes with layout:
+    /// `| version | len(txIns) | txIns | len(txOuts) | txOuts | locktime |`
+    ///
+    /// This function is required to compute the transaction txid if it contains a
+    /// witness, since the txid is a hash over the serialized transaction
+    /// ignoring the witness. See
+    /// [BIP141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)
+    /// for more details.
     public func toBytesIgnoringWitness() : [Nat8] {
       // Serialize TxInputs to bytes.
       let serializedTxIns : [[Nat8]] = Array.map<TxInput.TxInput, [Nat8]>(

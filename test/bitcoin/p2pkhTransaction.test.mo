@@ -164,7 +164,7 @@ func testTransactionToBytes(testCase : TransactionTestCase) {
 
 func testTransactionId(testCase : TransactionTestCase) {
   let transaction = makeTransaction(testCase);
-  let actualId = transaction.id();
+  let actualId = transaction.txid();
 
   assert(testCase.expectedId == actualId);
 };
