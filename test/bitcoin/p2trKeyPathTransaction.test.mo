@@ -18,7 +18,7 @@ for (testCase in TestVectors.testCases().vals()) {
     test(
         "expected transaction id with " # Nat.toText(testCase.numInputs) # " inputs",
         func() {
-            let computedTransactionId = testCase.signedTransaction().id();
+            let computedTransactionId = testCase.signedTransaction().txid();
 
             expect.blob(Blob.fromArray(computedTransactionId)).equal(Blob.fromArray(testCase.expectedTransactionId));
         },

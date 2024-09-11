@@ -10,7 +10,10 @@ module {
 
     public let EMPTY_WITNESS : Witness = [];
 
-    // A witness is serialized as | num_elements | e_1_size | e_1 | ... | e_n_size | e_n |
+    /// A witness is serialized as
+    /// `| num_elements | e_1_size | e_1 | ... | e_n_size | e_n |`. See
+    /// [BIP144](https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki)
+    /// for more details.
     public func toBytes(witness : Witness) : [Nat8] {
         let numElements = witness.size();
         let buffer = Buffer.Buffer<[Nat8]>(numElements * 2 + 1);

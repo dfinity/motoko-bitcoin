@@ -1,11 +1,9 @@
 import Types "./Types";
-import Ecdsa "../ecdsa/Ecdsa";
 import Script "./Script";
 import Segwit "../Segwit";
 import Result "mo:base/Result";
 
 module {
-    type PublicKey = Ecdsa.PublicKey;
     type Script = Script.Script;
 
     public type P2trKeyAddress = Types.P2trKeyAddress;
@@ -14,7 +12,9 @@ module {
         publicKeyHash : [Nat8];
     };
 
-    // Create script for the given P2TR key spend address.
+    /// Create script for the given P2TR key spend address (see
+    /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki)
+    /// for more details).
     public func makeScriptFromP2trKeyAddress(address : P2trKeyAddress) : Result.Result<Script, Text> {
         return switch (Segwit.decode(address)) {
             case (#ok(_, { version = _; program })) {
