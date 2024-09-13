@@ -17,7 +17,6 @@ import Witness "Witness";
 import Sha256 "mo:sha2/Sha256";
 
 module {
-
   // Deserialize transaction from data with the following layout:
   // | version | maybe witness flags | len(txIns) | txIns | len(txOuts) | txOuts
   // | locktime | witness if witness flags present |

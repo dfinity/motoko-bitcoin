@@ -1,9 +1,7 @@
 import Iter "mo:base/Iter";
-import Debug "mo:base/Debug";
-import Nat "mo:base/Nat";
 import Base58 "../src/Base58";
+import {test} "mo:test";
 
-do {
   let testData: [([Nat8], Text)] = [
     (
       [],
@@ -109,21 +107,26 @@ do {
     ),
   ];
 
-  Debug.print("Base58");
-  for (i in Iter.range(0, testData.size() - 1)) {
-    do {
-      Debug.print("   Encode " # Nat.toText(i));
+test(
+  "encode",
+  func() {
+    for (i in Iter.range(0, testData.size() - 1)) {
       let input = testData[i].0;
       let expected = testData[i].1;
       let actual = Base58.encode(input);
-      assert(expected == actual);
+      assert (expected == actual);
     };
-    do {
-      Debug.print("   Decode " # Nat.toText(i));
+  },
+);
+
+test(
+  "decode",
+  func() {
+    for (i in Iter.range(0, testData.size() - 1)) {
       let input = testData[i].1;
       let expected = testData[i].0;
       let actual = Base58.decode(input);
-      assert(expected == actual);
+      assert (expected == actual);
     };
-  };
-};
+  },
+);

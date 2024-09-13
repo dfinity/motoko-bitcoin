@@ -1,6 +1,7 @@
+import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
-import Debug "mo:base/Debug";
 import Hmac "../src/Hmac";
+import {test} "mo:test";
 
 let testData: [{
   desc : Text;
@@ -211,27 +212,29 @@ let testData: [{
 ];
 
 
-do {
-  Debug.print("HMAC");
-  for (i in Iter.range(0, testData.size() - 1)) {
-    Debug.print("  " # testData[i].desc);
 
-    do {
-      Debug.print("    SHA256");
+test(
+  "SHA256",
+  func() {
+    for (i in Iter.range(0, testData.size() - 1)) {
       let hmac : Hmac.Hmac = Hmac.sha256(testData[i].key);
-      hmac.write(testData[i].message);
+      hmac.writeArray(testData[i].message);
 
-      let actual : [Nat8] = hmac.sum();
-      assert(testData[i].expectedSHA256 == actual);
+      let actual : [Nat8] = Blob.toArray(hmac.sum());
+      assert (testData[i].expectedSHA256 == actual);
     };
+  },
+);
 
-    do {
-      Debug.print("    SHA512");
+test(
+  "SHA512",
+  func() {
+    for (i in Iter.range(0, testData.size() - 1)) {
       let hmac : Hmac.Hmac = Hmac.sha512(testData[i].key);
-      hmac.write(testData[i].message);
+      hmac.writeArray(testData[i].message);
 
-      let actual : [Nat8] = hmac.sum();
-      assert(testData[i].expectedSHA512 == actual);
-    }
-  };
-};
+      let actual : [Nat8] = Blob.toArray(hmac.sum());
+      assert (testData[i].expectedSHA512 == actual);
+    };
+  },
+);

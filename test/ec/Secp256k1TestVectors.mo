@@ -1,5 +1,3 @@
-import TestUtils "../TestUtils";
-
 module {
   public type SerializationVector = {
     coords : ?(Nat, Nat);

@@ -1,7 +1,6 @@
 import Affine "../../src/ec/Affine";
 import Curves "../../src/ec/Curves";
 import TestUtils "../TestUtils";
-import Debug "mo:base/Debug";
 
 let curve = Curves.secp256k1;
 let Fp = curve.Fp;
@@ -185,8 +184,6 @@ func testToBytes(testCase : ToBytesTestCase) {
   assert(testCase.compressed == actualCompressed);
   assert(testCase.uncompressed == actualUncompressed);
 };
-
-Debug.print("Affine tests");
 
 let runTest = TestUtils.runTestWithDefaults;
 
