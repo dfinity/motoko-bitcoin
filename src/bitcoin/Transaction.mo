@@ -222,6 +222,13 @@ module {
       createTaprootSignatureHash(amounts, scriptPubKey, txInputIndex, null);
     };
 
+    /// Create a P2TR script spend signature hash for this transaction. This is
+    /// computed for each transaction input separately. This function takes in
+    /// the `amounts` of the outputs being spent, the `scriptPubKey` of the
+    /// spender address, the `txInputIndex` of the input being signed and the
+    /// `leaf_hash` of the leaf script. The full signature hash computation
+    /// algorithm is described in
+    /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#user-content-Signature_validation_rules).
     public func createTaprootScriptSpendSignatureHash(
       amounts : [Nat64],
       scriptPubKey : Script.Script,
