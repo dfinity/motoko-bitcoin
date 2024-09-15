@@ -319,6 +319,8 @@ module {
       // spend_type = (ext_flag * 2) + annex_present
       let (spend_type, scriptpath_bytes) : ([Nat8], [Nat8]) = switch (maybe_leaf_hash) {
         case (?leaf_hash) {
+          // as defined in
+          // [BIP342](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki#common-signature-message-extension)
           assert leaf_hash.size() == 32;
           let KEY_VERSION_0 : [Nat8] = [0x00];
           let OP_SEPARATOR_POS : [Nat8] = [0xFF, 0xFF, 0xFF, 0xFF];
