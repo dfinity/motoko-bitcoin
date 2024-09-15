@@ -228,10 +228,11 @@ module {
     /// spender address, the `txInputIndex` of the input being signed and the
     /// `leaf_hash` of the leaf script. The full signature hash computation
     /// algorithm is described in
-    ///
     /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#user-content-Signature_validation_rules)
     /// and
     /// [BIP342](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki).
+    ///
+    /// This method traps if the `leaf_hash` is not 32 bytes long. 
     public func createTaprootScriptSpendSignatureHash(
       amounts : [Nat64],
       scriptPubKey : Script.Script,
