@@ -64,6 +64,14 @@ module {
         Hash.taggedHash(Array.flatten([TAPROOT_LEAF_TAPSCRIPT, script_bytes]), "TapLeaf");
     };
 
+    /// Computes a tweak from the internal key and a hash. Corresponds to
+    /// ```python
+    ///     t = int_from_bytes(tagged_hash("TapTweak", pubkey + h))
+    ///     if t >= SECP256K1_ORDER:
+    ///         raise ValueError
+    /// ```
+    /// in `taproot_tweak_pubkey` function in
+    /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki).
     public func tweakFromKeyAndHash(internal_key : [Nat8], hash : [Nat8]) : Result.Result<Fp.Fp, Text> {
         if (internal_key.size() != 32) {
             return #err("Failed to compute tweak, invalid internal key length: expected 32 but got " # Nat.toText(internal_key.size()));
@@ -82,6 +90,16 @@ module {
         #ok(Curves.secp256k1.Fp(tweak));
     };
 
+    /// Corresponds to
+    /// ```python
+    ///     P = lift_x(int_from_bytes(pubkey))
+    ///     if P is None:
+    ///         raise ValueError
+    ///     Q = point_add(P, point_mul(G, t))
+    ///     return 0 if has_even_y(Q) else 1, bytes_from_int(x(Q))
+    /// ```
+    /// `taproot_tweak_pubkey` function in
+    /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki).
     public func tweakPublicKey(public_key_bip340_bytes : [Nat8], tweak : Fp.Fp) : Result.Result<PublicKey, Text> {
         let even_point_flag : [Nat8] = [0x02];
         let public_key_sec1_bytes = Array.flatten([even_point_flag, public_key_bip340_bytes]);
