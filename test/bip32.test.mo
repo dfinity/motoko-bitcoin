@@ -8,7 +8,7 @@ type DerivationVector = {
 };
 
 type ParseInvalidDataVector = {
-  reason : Text;
+  reason : Text ;
   data : Text;
 };
 
