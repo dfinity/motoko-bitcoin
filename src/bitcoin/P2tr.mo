@@ -1,6 +1,5 @@
 import Common "../Common";
 import Curves "../ec/Curves";
-import Ecdsa "../ecdsa/Ecdsa";
 import Fp "../ec/Fp";
 import Hash "../Hash";
 import Result "mo:base/Result";
@@ -9,7 +8,6 @@ import Nat "mo:base/Nat";
 import Script "./Script";
 import Segwit "../Segwit";
 import Types "./Types";
-import Affine "../ec/Affine";
 import Jacobi "../ec/Jacobi";
 
 module {

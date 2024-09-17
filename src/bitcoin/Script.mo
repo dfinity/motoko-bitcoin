@@ -576,7 +576,7 @@ module Script {
     if (readSize and totalReadCount < size) {
       return #err "Truncated script.";
     };
-    return #ok(instructionsBuf.toArray());
+    return #ok(Buffer.toArray(instructionsBuf));
   };
 
   // Serialize given script to bytes.

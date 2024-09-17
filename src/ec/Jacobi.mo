@@ -7,7 +7,6 @@
 // Therefore, DO NOT use this code for any operations involving secrets.
 
 import Iter "mo:base/Iter";
-import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Debug "mo:base/Debug";
 import BaseFp "./Fp";

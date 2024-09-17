@@ -176,7 +176,7 @@ module {
         };
       };
     };
-    return ?parsedPathBuffer.toArray();
+    return ?Buffer.toArray(parsedPathBuffer);
   };
 
   // Representation of a BIP32 extended public key.

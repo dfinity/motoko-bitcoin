@@ -135,8 +135,8 @@ module {
       };
       valuesBuffer.add(mappedVal);
     };
-    let values : [Nat8] = valuesBuffer.toArray();
-    let hrp : [Nat8] = hrpBuffer.toArray();
+    let values : [Nat8] = Buffer.toArray(valuesBuffer);
+    let hrp : [Nat8] = Buffer.toArray(hrpBuffer);
 
     return switch (
       verifyChecksum(hrp, values),
@@ -150,7 +150,7 @@ module {
         for (i in Iter.range(0, 5)) {
           ignore (valuesBuffer.removeLast());
         };
-        return #ok(encodingType, hrp, valuesBuffer.toArray());
+        return #ok(encodingType, hrp, Buffer.toArray(valuesBuffer));
       };
       case _ {
         #err("Failed to decode HRP.");
@@ -210,7 +210,7 @@ module {
       polyModValues.add(0);
     };
 
-    let mod : Nat32 = polymod(polyModValues.toArray()) ^ encodingConstant(encoding);
+    let mod : Nat32 = polymod(Buffer.toArray(polyModValues)) ^ encodingConstant(encoding);
 
     // Convert the 5-bit groups in mod to checksum data.
     return Array.tabulate<Nat8>(
@@ -242,7 +242,7 @@ module {
       polyModValues.add(val);
     };
 
-    let check : Nat32 = polymod(polyModValues.toArray());
+    let check : Nat32 = polymod(Buffer.toArray(polyModValues));
 
     return if (check == encodingConstant(#BECH32)) {
       #ok(#BECH32);

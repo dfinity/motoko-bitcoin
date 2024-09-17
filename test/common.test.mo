@@ -1,5 +1,4 @@
 import Iter "mo:base/Iter";
-import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Common "../src/Common";
 import { test } "mo:test";
