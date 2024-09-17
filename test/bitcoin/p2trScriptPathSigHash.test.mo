@@ -7,13 +7,13 @@ for (testCase in TestVectors.testCases().vals()) {
     test(
         Nat.toText(testCase.numInputs) # " inputs",
         func() {
-            assert testCase.expectedKeySpendSigHashes.size() == testCase.numInputs;
+            assert testCase.expectedScriptSpendSigHashes.size() == testCase.numInputs;
 
-            let computedSigHashes = testCase.keySpendSigHashes();
+            let computedSigHashes = testCase.scriptSpendSigHashes();
             assert computedSigHashes.size() == testCase.numInputs;
 
             for (inputIndex in computedSigHashes.keys()) {
-                expect.blob(Blob.fromArray(computedSigHashes[inputIndex])).equal(Blob.fromArray(testCase.expectedKeySpendSigHashes[inputIndex]));
+                expect.blob(Blob.fromArray(computedSigHashes[inputIndex])).equal(Blob.fromArray(testCase.expectedScriptSpendSigHashes[inputIndex]));
             };
         },
     );

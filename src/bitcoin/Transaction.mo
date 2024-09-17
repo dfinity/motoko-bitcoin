@@ -218,6 +218,35 @@ module {
       scriptPubKey : Script.Script,
       txInputIndex : Nat32,
     ) : [Nat8] {
+      createTaprootSignatureHash(amounts, scriptPubKey, txInputIndex, null);
+    };
+
+    /// Create a P2TR script spend signature hash for this transaction. This is
+    /// computed for each transaction input separately. This function takes in
+    /// the `amounts` of the outputs being spent, the `scriptPubKey` of the
+    /// spender address, the `txInputIndex` of the input being signed and the
+    /// `leaf_hash` of the leaf script. The full signature hash computation
+    /// algorithm is described in
+    /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#user-content-Signature_validation_rules)
+    /// and
+    /// [BIP342](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki).
+    ///
+    /// This method traps if the `leaf_hash` is not 32 bytes long. 
+    public func createTaprootScriptSpendSignatureHash(
+      amounts : [Nat64],
+      scriptPubKey : Script.Script,
+      txInputIndex : Nat32,
+      leaf_hash : [Nat8],
+    ) : [Nat8] {
+      createTaprootSignatureHash(amounts, scriptPubKey, txInputIndex, ?leaf_hash);
+    };
+
+    func createTaprootSignatureHash(
+      amounts : [Nat64],
+      scriptPubKey : Script.Script,
+      txInputIndex : Nat32,
+      maybe_leaf_hash : ?[Nat8],
+    ) : [Nat8] {
       let prevouts = Array.map<TxInput.TxInput, [Nat8]>(
         txInputs,
         func(txin) {
@@ -283,12 +312,24 @@ module {
 
       let sha_outputs : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, outputs_bytes));
 
-      // (ext_flag * 2) + annex_present
-      let spend_type : [Nat8] = [0x00];
-
       var input_index_buffer = Array.init<Nat8>(4, 0);
       Common.writeLE32(input_index_buffer, 0, txInputIndex);
       let input_index = Array.freeze(input_index_buffer);
+
+      // spend_type = (ext_flag * 2) + annex_present
+      let (spend_type, scriptpath_bytes) : ([Nat8], [Nat8]) = switch (maybe_leaf_hash) {
+        case (?leaf_hash) {
+          // as defined in
+          // [BIP342](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki#common-signature-message-extension)
+          assert leaf_hash.size() == 32;
+          let KEY_VERSION_0 : [Nat8] = [0x00];
+          let OP_SEPARATOR_POS : [Nat8] = [0xFF, 0xFF, 0xFF, 0xFF];
+          ([0x02], Array.flatten([leaf_hash, KEY_VERSION_0, OP_SEPARATOR_POS]));
+        };
+        case (null) {
+          ([0x00], []);
+        };
+      };
 
       let data = Array.flatten<Nat8>([
         epoch,
@@ -302,6 +343,7 @@ module {
         sha_outputs,
         spend_type,
         input_index,
+        scriptpath_bytes,
       ]);
 
       return Hash.taggedHash(data, "TapSighash");

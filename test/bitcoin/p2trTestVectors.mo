@@ -10,6 +10,7 @@ import P2pkh "../../src/bitcoin/P2pkh";
 import TxOutput "../../src/bitcoin/TxOutput";
 import Transaction "../../src/bitcoin/Transaction";
 import Witness "../../src/bitcoin/Witness";
+import Segwit "../../src/Segwit";
 
 // The expected sighashes in this test were generated using the Rust `bitcoin` crate.
 module {
@@ -21,12 +22,13 @@ module {
 
     public let version : Nat32 = 2;
 
-    public class TestCase(_output_0 : Types.Satoshi, _output_1 : Types.Satoshi, _expectedSigHashes : [[Nat8]], _expectedSerializedTransaction : [Nat8], _expectedTransactionId : [Nat8]) {
+    public class TestCase(_output_0 : Types.Satoshi, _output_1 : Types.Satoshi, _expectedKeySpendSigHashes : [[Nat8]], _expectedScriptSpendSigHashes : [[Nat8]], _expectedSerializedTransaction : [Nat8], _expectedTransactionId : [Nat8]) {
         public let output_0 : Types.Satoshi = _output_0;
         public let output_1 : Types.Satoshi = _output_1;
-        public let expectedSigHashes : [[Nat8]] = _expectedSigHashes;
+        public let expectedKeySpendSigHashes : [[Nat8]] = _expectedKeySpendSigHashes;
+        public let expectedScriptSpendSigHashes : [[Nat8]] = _expectedScriptSpendSigHashes;
 
-        public let numInputs : Nat = Array.size(expectedSigHashes);
+        public let numInputs : Nat = Array.size(expectedKeySpendSigHashes);
         assert numInputs > 0;
 
         public let expectedSerializedTransaction : [Nat8] = _expectedSerializedTransaction;
@@ -116,6 +118,26 @@ module {
             };
         };
 
+        public func leafScript() : Script.Script {
+            let bip340_public_key = switch (Segwit.decode(ownAddress)) {
+                case (#ok(_, { version = _; program })) {
+                    program;
+                };
+                case (#err msg) {
+                    Debug.trap("Could not decode address: " # msg);
+                };
+            };
+
+            switch (P2tr.leafScript(bip340_public_key)) {
+                case (#ok(script)) {
+                    script;
+                };
+                case (#err(msg)) {
+                    Debug.trap("Could not create leaf script from public key: " # msg);
+                };
+            };
+        };
+
         public func outputs() : [TxOutput.TxOutput] {
             let dstScript = switch (P2pkh.makeScript(dstAddress)) {
                 case (#ok(script)) {
@@ -147,7 +169,7 @@ module {
             );
         };
 
-        public func sigHashes() : [[Nat8]] {
+        public func keySpendSigHashes() : [[Nat8]] {
             // `moc` doesn't let us use `transaction` as a name with [M0097] error.
             let _transaction : Transaction.Transaction = transaction();
             let sigHashes = Array.init<[Nat8]>(numInputs, []);
@@ -162,9 +184,26 @@ module {
             Array.freeze(sigHashes);
         };
 
-        public func signedTransaction() : Transaction.Transaction {
+        public func scriptSpendSigHashes() : [[Nat8]] {
+            // `moc` doesn't let us use `transaction` as a name with [M0097] error.
+            let _transaction : Transaction.Transaction = transaction();
+            let sigHashes = Array.init<[Nat8]>(numInputs, []);
+            let leafHash = P2tr.leafHash(leafScript());
+            for (inputIndex in sigHashes.keys()) {
+                let sigHash = _transaction.createTaprootScriptSpendSignatureHash(
+                    amounts(),
+                    ownScript(),
+                    Nat32.fromNat(inputIndex),
+                    leafHash,
+                );
+                sigHashes[inputIndex] := sigHash;
+            };
+            Array.freeze(sigHashes);
+        };
+
+        public func keySpendSignedTransaction() : Transaction.Transaction {
             // `moc` doesn't let us use same names for functions and local vars with [M0097] error.
-            let _sigHashes = Array.thaw<[Nat8]>(sigHashes());
+            let _sigHashes = Array.thaw<[Nat8]>(keySpendSigHashes());
             let _transaction : Transaction.Transaction = transaction();
 
             let signatureByteLength = 64;
@@ -199,6 +238,13 @@ module {
                 ],
                 // prettier-ignore
                 [
+                    [
+                        109, 122, 168, 58, 60, 70, 147, 175, 215, 165, 143, 11, 251, 83, 74, 171, 187, 114,
+                        36, 82, 177, 84, 71, 217, 144, 131, 14, 225, 10, 75, 133, 243
+                    ]
+                ],
+                // prettier-ignore
+                [
                     2, 0, 0, 0, 0, 1, 1, 66, 24, 164, 25, 84, 39, 87, 217, 96, 23, 68, 87, 220, 130, 224,
                     107, 54, 19, 172, 142, 210, 197, 40, 146, 104, 51, 67, 56, 131, 245, 225, 248, 85, 0,
                     0, 0, 0, 255, 255, 255, 255, 2, 1, 0, 0, 0, 0, 0, 0, 0, 25, 118, 169, 20, 7, 181, 210,
@@ -224,6 +270,17 @@ module {
                     [
                         2, 224, 77, 119, 91, 254, 63, 23, 168, 126, 0, 88, 181, 250, 253, 26, 196, 41, 130,
                         89, 120, 92, 203, 32, 238, 33, 183, 235, 75, 52, 232, 185
+                    ]
+                ],
+                // prettier-ignore
+                [
+                    [
+                        160, 117, 156, 158, 96, 169, 130, 50, 111, 130, 18, 1, 110, 240, 213, 200, 60, 55, 203,
+                        108, 253, 172, 163, 177, 229, 92, 39, 219, 62, 196, 177, 221
+                    ],
+                    [
+                        55, 194, 100, 82, 86, 223, 174, 204, 24, 54, 237, 137, 184, 3, 68, 224, 123, 31, 225,
+                        243, 212, 30, 175, 32, 24, 109, 86, 215, 33, 50, 37, 154
                     ]
                 ],
                 // prettier-ignore
@@ -262,6 +319,21 @@ module {
                     [
                         243, 5, 80, 5, 44, 217, 13, 111, 23, 243, 255, 126, 78, 105, 156, 5, 102, 22, 214, 172,
                         211, 54, 21, 180, 162, 140, 49, 154, 252, 172, 197, 77
+                    ]
+                ],
+                // prettier-ignore
+                [
+                    [
+                        62, 199, 215, 47, 62, 220, 69, 90, 3, 43, 145, 244, 147, 17, 161, 80, 158, 77, 12, 175, 241,
+                        102, 253, 88, 146, 124, 126, 186, 40, 91, 38, 39
+                    ],
+                    [
+                        201, 192, 82, 51, 84, 247, 244, 131, 154, 97, 216, 243, 213, 94, 96, 235, 109, 234, 228, 61,
+                        227, 125, 211, 246, 178, 214, 4, 51, 20, 160, 77, 214
+                    ],
+                    [
+                        47, 138, 62, 60, 211, 24, 204, 113, 155, 228, 154, 249, 105, 242, 213, 130, 82, 235, 172, 106,
+                        115, 53, 108, 241, 133, 169, 38, 60, 183, 94, 57, 151
                     ]
                 ],
                 // prettier-ignore
