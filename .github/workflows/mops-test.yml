@@ -10,6 +10,7 @@ on:
 
 jobs:
   test:
+    name: Run tests
     runs-on: ubuntu-22.04
 
     steps:
@@ -27,3 +28,14 @@ jobs:
 
       - name: run tests
         run: mops test --mode wasi
+
+  format:
+    name: Check formatting
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4.0.3
+        with:
+          node-version: "20"
+      - run: npm install --save-dev prettier prettier-plugin-motoko
+      - run: npx prettier --check --plugin=prettier-plugin-motoko **/*.mo
