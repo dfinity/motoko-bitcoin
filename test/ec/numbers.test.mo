@@ -95,6 +95,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0x1e545442;
+    // prettier-ignore
     expected = [
       true, true, true, true, false, false, true, false, true, false, true,
       false, false, false, true, false, true, false, true, false, false, false,
@@ -103,6 +104,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0xe91c2b8e;
+    // prettier-ignore
     expected = [
       true, true, true, false, true, false, false, true, false, false, false,
       true, true, true, false, false, false, false, true, false, true, false,
@@ -111,6 +113,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0x7560804a;
+    // prettier-ignore
     expected = [
       true, true, true, false, true, false, true, false, true, true, false,
       false, false, false, false, true, false, false, false, false, false, false,
@@ -119,6 +122,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0xf9859ac1;
+    // prettier-ignore
     expected = [
       true, true, true, true, true, false, false, true, true, false, false,
       false, false, true, false, true, true, false, false, true, true, false,
@@ -127,6 +131,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0x10471430;
+    // prettier-ignore
     expected = [
       true, false, false, false, false, false, true, false, false, false, true,
       true, true, false, false, false, true, false, true, false, false, false,

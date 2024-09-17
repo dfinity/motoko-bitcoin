@@ -27,6 +27,7 @@ module {
   // Code for '~'.
   let CHARS_HIGHLIMIT : Nat8 = 0x7e;
 
+  // prettier-ignore
   let charset : [Char] = [
     'q', 'p', 'z', 'r', 'y', '9', 'x', '8', 'g', 'f', '2', 't', 'v', 'd', 'w',
     '0', 's', '3', 'j', 'n', '5', '4', 'k', 'h', 'c', 'e', '6', 'm', 'u', 'a',
@@ -35,6 +36,7 @@ module {
 
   // Mapping from ASCII to indices in charset for characters that exist in
   // charset. 255 is treated as a non-valid index.
+  // prettier-ignore
   let reverseCharset : [Nat8] = [
     255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
     255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,

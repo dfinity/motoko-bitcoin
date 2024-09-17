@@ -7,6 +7,7 @@ import Iter "mo:base/Iter";
 
 module {
   // All alphanumeric characters except for "0", "I", "O", and "l".
+  // prettier-ignore
   private let base58Alphabet : [Char] = [
     '1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G',
     'H','J','K','L','M','N','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -14,6 +15,7 @@ module {
     's','t','u','v','w','x','y','z'
   ];
 
+  // prettier-ignore
   private let mapBase58 : [Nat8] = [
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255,
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255,
