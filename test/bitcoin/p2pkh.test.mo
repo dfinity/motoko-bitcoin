@@ -54,16 +54,18 @@ let makeScriptTestCases : [MakeScriptTestCase] = [
 ];
 
 func testP2pkhDeriveAddress(testCase : AddressTestCase) {
-  let actual = P2pkh.deriveAddress(testCase.network,
-    (testCase.key, Curves.secp256k1));
-  assert(testCase.p2pkh == actual);
+  let actual = P2pkh.deriveAddress(
+    testCase.network,
+    (testCase.key, Curves.secp256k1),
+  );
+  assert (testCase.p2pkh == actual);
 };
 
 func testP2pkhDecodeAddress(testCase : AddressTestCase) {
   switch (P2pkh.decodeAddress(testCase.p2pkh)) {
-    case (#ok {network; publicKeyHash}) {
-      assert(testCase.network == network);
-      assert(Hash.hash160(testCase.key) == publicKeyHash);
+    case (#ok { network; publicKeyHash }) {
+      assert (testCase.network == network);
+      assert (Hash.hash160(testCase.key) == publicKeyHash);
     };
     case (#err msg) {
       Debug.trap(msg);
@@ -74,7 +76,7 @@ func testP2pkhDecodeAddress(testCase : AddressTestCase) {
 func testMakeScript(testCase : MakeScriptTestCase) {
   switch (P2pkh.makeScript(testCase.address)) {
     case (#ok script) {
-      assert(testCase.expectedBytes == Script.toBytes(script));
+      assert (testCase.expectedBytes == Script.toBytes(script));
     };
     case (#err msg) {
       Debug.trap(msg);

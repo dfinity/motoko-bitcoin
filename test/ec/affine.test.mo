@@ -169,11 +169,11 @@ func testFromBytes(testCase : FromBytesTestCase) {
       // ok
     };
     case (?coords, ?actualPoint) {
-      let expectedPoint = #point (Fp(coords.0), Fp(coords.1), curve);
-      assert(Affine.isEqual(expectedPoint, actualPoint));
+      let expectedPoint = #point(Fp(coords.0), Fp(coords.1), curve);
+      assert (Affine.isEqual(expectedPoint, actualPoint));
     };
     case _ {
-      assert(false);
+      assert (false);
     };
   };
 };
@@ -181,17 +181,17 @@ func testFromBytes(testCase : FromBytesTestCase) {
 func testToBytes(testCase : ToBytesTestCase) {
   let point = switch (testCase.coords) {
     case (null) {
-      #infinity(curve)
+      #infinity(curve);
     };
     case (?coords) {
-      #point (Fp(coords.0), Fp(coords.1), curve);
+      #point(Fp(coords.0), Fp(coords.1), curve);
     };
   };
   let actualCompressed = Affine.toBytes(point, true);
   let actualUncompressed = Affine.toBytes(point, false);
 
-  assert(testCase.compressed == actualCompressed);
-  assert(testCase.uncompressed == actualUncompressed);
+  assert (testCase.compressed == actualCompressed);
+  assert (testCase.uncompressed == actualUncompressed);
 };
 
 let runTest = TestUtils.runTestWithDefaults;

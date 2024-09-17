@@ -24,10 +24,10 @@ module {
   func decodeVersion(version : Nat8) : ?Types.Network {
     return switch (version) {
       case (0x80) {
-        ?(#Mainnet)
+        ?(#Mainnet);
       };
       case (0xef) {
-        ?(#Testnet)
+        ?(#Testnet);
       };
       case _ {
         null;
@@ -37,33 +37,29 @@ module {
 
   // Decode WIF private key to extract network, private key,
   // and compression flag.
-  public func decode(key : WifPrivateKey)
-    : Result.Result<Types.BitcoinPrivateKey, Text> {
-    let decoded: Iter.Iter<Nat8> = switch (Base58Check.decode(key)) {
+  public func decode(key : WifPrivateKey) : Result.Result<Types.BitcoinPrivateKey, Text> {
+    let decoded : Iter.Iter<Nat8> = switch (Base58Check.decode(key)) {
       case (?b58decoded) {
-        b58decoded.vals()
+        b58decoded.vals();
       };
       case _ {
-        return #err ("Could not base58 decode key.");
+        return #err("Could not base58 decode key.");
       };
     };
     // Split into version || data || compressed.
-    let (version, data, compressed) : (Nat8, [Nat8], Bool) =  switch (
+    let (version, data, compressed) : (Nat8, [Nat8], Bool) = switch (
       decoded.next(),
       ByteUtils.read(decoded, 32, false),
       decoded.next(),
-      decoded.next()){
-      case (?version, ?data, ?(0x01), null) {
-        (version, data, true)
-      };
-      case (?version, ?data, null, null) {
-        (version, data, false)
-      };
+      decoded.next(),
+    ) {
+      case (?version, ?data, ?(0x01), null) { (version, data, true) };
+      case (?version, ?data, null, null) { (version, data, false) };
       case (_, _, ?(_compressionFlag), _) {
-        return #err ("Invalid compression flag.");
+        return #err("Invalid compression flag.");
       };
       case _ {
-        return #err ("Invalid key format.");
+        return #err("Invalid key format.");
       };
     };
 
@@ -72,11 +68,11 @@ module {
         network;
       };
       case _ {
-        return #err ("Unknown network version.");
+        return #err("Unknown network version.");
       };
     };
 
-    return #ok ({
+    return #ok({
       network = network;
       key = Common.readBE256(data, 0);
       compressedPublicKey = compressed;

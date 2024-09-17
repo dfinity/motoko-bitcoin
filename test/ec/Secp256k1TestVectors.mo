@@ -24,9 +24,9 @@ module {
   };
 
   public type AdditionVector = {
-    desc: Text;
-    coords1: ?(Nat, Nat);
-    coords2: ?(Nat, Nat);
+    desc : Text;
+    coords1 : ?(Nat, Nat);
+    coords2 : ?(Nat, Nat);
     output : ?(Nat, Nat);
   };
 
@@ -46,7 +46,7 @@ module {
         0xc6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5,
         0x1ae168fea63dc339a3c58419466ceaeef7f632653266d0e1236431a950cfe52a,
       );
-    }
+    },
   ];
 
   public let additionVectors : [AdditionVector] = [
@@ -94,10 +94,10 @@ module {
         0xc6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5,
         0x1ae168fea63dc339a3c58419466ceaeef7f632653266d0e1236431a950cfe52a,
       );
-    }
+    },
   ];
 
-  public let multiplicationVectors: [MultiplicationVector] = [
+  public let multiplicationVectors : [MultiplicationVector] = [
     {
       desc = "Multiply with infinity";
       coords = null;
@@ -151,13 +151,12 @@ module {
     },
   ];
 
-  public let serializationVectors : [SerializationVector] = [
-    {
-      coords = ?(
-        0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
-        0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8,
-      );
-      // prettier-ignore
+  public let serializationVectors : [SerializationVector] = [{
+    coords = ?(
+      0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
+      0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8,
+    );
+    // prettier-ignore
       uncompressed = [
         0x04, 0x79, 0xbe, 0x66, 0x7e, 0xf9, 0xdc, 0xbb, 0xac, 0x55, 0xa0, 0x62,
         0x95, 0xce, 0x87, 0x0b, 0x07, 0x02, 0x9b, 0xfc, 0xdb, 0x2d, 0xce, 0x28,
@@ -166,16 +165,15 @@ module {
         0xa8, 0xfd, 0x17, 0xb4, 0x48, 0xa6, 0x85, 0x54, 0x19, 0x9c, 0x47, 0xd0,
         0x8f, 0xfb, 0x10, 0xd4, 0xb8
       ];
-      // prettier-ignore
+    // prettier-ignore
       compressed = [
         0x02, 0x79, 0xbe, 0x66, 0x7e, 0xf9, 0xdc, 0xbb, 0xac, 0x55, 0xa0, 0x62,
         0x95, 0xce, 0x87, 0x0b, 0x07, 0x02, 0x9b, 0xfc, 0xdb, 0x2d, 0xce, 0x28,
         0xd9, 0x59, 0xf2, 0x81, 0x5b, 0x16, 0xf8, 0x17, 0x98
       ];
-    }
-  ];
+  }];
 
-  public let baseMultiplicationVectors : [BaseMultiplicationVector] =  [
+  public let baseMultiplicationVectors : [BaseMultiplicationVector] = [
     {
       multiplicand = 1;
       output = (
@@ -489,7 +487,7 @@ module {
       output = (
         0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
         0xb7c52588d95c3b9aa25b0403f1eef75702e84bb7597aabe663b82f6f04ef2777,
-      )
-    }
+      );
+    },
   ];
 };

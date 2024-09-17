@@ -59,9 +59,9 @@ let eeaTestVectors : [EeaTestVector] = [
   },
 ];
 
-func testEea({input; expected} : EeaTestVector) {
+func testEea({ input; expected } : EeaTestVector) {
   let actual = Numbers.eea(input.0, input.1);
-  assert(expected == actual);
+  assert (expected == actual);
 };
 
 let toBinaryTestVectors : [ToBinaryTestVector] = [
@@ -139,9 +139,9 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
     ];
   },
 ];
-func testToBinary({input; expected}: ToBinaryTestVector) {
+func testToBinary({ input; expected } : ToBinaryTestVector) {
   let actual = Numbers.toBinary(input);
-  assert(expected == actual);
+  assert (expected == actual);
 };
 
 let toNafTestVectors : [ToNafTestVector] = [
@@ -166,9 +166,9 @@ let toNafTestVectors : [ToNafTestVector] = [
     expected = [1, 0, -1, 0, 0, 0, 0, 0, -1, 0, 0, 0, -1, 0, -1, 0, 1];
   },
 ];
-func testToNaf({input; expected} : ToNafTestVector) {
+func testToNaf({ input; expected } : ToNafTestVector) {
   let actual = Numbers.toNaf(input);
-  assert(expected == actual);
+  assert (expected == actual);
 };
 
 let runTest = TestUtils.runTestWithDefaults;

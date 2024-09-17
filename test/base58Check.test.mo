@@ -1,78 +1,111 @@
 import Iter "mo:base/Iter";
 import Base58Check "../src/Base58Check";
-import {test} "mo:test";
+import { test } "mo:test";
 
-  let testData: [(?[Nat8], Text)] = [
-    (
-      ?[],
-      "3QJmnh"
-    ),
-    (
-      ?[0x61],
-      "C2dGTwc"
-    ),
-    (
-      // wrong checksum, decode returns null
-      null,
-      "C2dGTwa"
-    ),
-    (
-      ?[0x62, 0x62, 0x62],
-      "4jF5uERJAK"
-    ),
-    (
-      ?[0x63, 0x63, 0x63],
-      "4mT4krqUYJ"
-    ),
-    (
-      // prettier-ignore
+let testData : [(?[Nat8], Text)] = [
+  (
+    ?[],
+    "3QJmnh",
+  ),
+  (
+    ?[0x61],
+    "C2dGTwc",
+  ),
+  (
+    // wrong checksum, decode returns null
+    null,
+    "C2dGTwa",
+  ),
+  (
+    ?[0x62, 0x62, 0x62],
+    "4jF5uERJAK",
+  ),
+  (
+    ?[0x63, 0x63, 0x63],
+    "4mT4krqUYJ",
+  ),
+  (
+    // prettier-ignore
       ?[
         0x73, 0x69, 0x6d, 0x70, 0x6c, 0x79, 0x20, 0x61, 0x20, 0x6c, 0x6f, 0x6e,
         0x67, 0x20, 0x73, 0x74, 0x72, 0x69, 0x6e, 0x67
       ],
-      "BXF1HuEUCqeVzZdrKeJjG74rjeXxqJ7dW"
-    ),
-    (
-      // prettier-ignore
+    "BXF1HuEUCqeVzZdrKeJjG74rjeXxqJ7dW",
+  ),
+  (
+    // prettier-ignore
       ?[
         0x0, 0xeb, 0x15, 0x23, 0x1d, 0xfc, 0xeb, 0x60, 0x92, 0x58, 0x86, 0xb6,
         0x7d, 0x6, 0x52, 0x99, 0x92, 0x59, 0x15, 0xae, 0xb1, 0x72, 0xc0, 0x66,
         0x47
       ],
-      "13REmUhe2ckUKy1FvM7AMCdtyYq831yxM3QeyEu4"
-    ),
-    (
-      ?[
-        0x51, 0x6b, 0x6f, 0xcd, 0xf
-      ],
-      "237LSrY9NUUas"
-    ),
-    (
-      ?[
-        0xbf, 0x4f, 0x89, 0x0, 0x1e, 0x67, 0x2, 0x74, 0xdd
-      ],
-      "GwDDDeduj1jpykc27e"
-    ),
-    (
-      ?[
-        0xec, 0xac, 0x89, 0xca, 0xd9, 0x39, 0x23, 0xc0, 0x23, 0x21
-      ],
-      "2W1Yd5Zu6WGyKVtHGMrH"
-    ),
-    (
-      ?[
-       0x10, 0xc8, 0x51, 0x1e
-      ],
-      "3op3iuGMmhs"
-    ),
-    (
-      ?[
-        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
-      ],
-      "111111111146Momb"
-    ),
-    (
-      // prettier-ignore
+    "13REmUhe2ckUKy1FvM7AMCdtyYq831yxM3QeyEu4",
+  ),
+  (
+    ?[
+      0x51,
+      0x6b,
+      0x6f,
+      0xcd,
+      0xf,
+    ],
+    "237LSrY9NUUas",
+  ),
+  (
+    ?[
+      0xbf,
+      0x4f,
+      0x89,
+      0x0,
+      0x1e,
+      0x67,
+      0x2,
+      0x74,
+      0xdd,
+    ],
+    "GwDDDeduj1jpykc27e",
+  ),
+  (
+    ?[
+      0xec,
+      0xac,
+      0x89,
+      0xca,
+      0xd9,
+      0x39,
+      0x23,
+      0xc0,
+      0x23,
+      0x21,
+    ],
+    "2W1Yd5Zu6WGyKVtHGMrH",
+  ),
+  (
+    ?[
+      0x10,
+      0xc8,
+      0x51,
+      0x1e,
+    ],
+    "3op3iuGMmhs",
+  ),
+  (
+    ?[
+      0x0,
+      0x0,
+      0x0,
+      0x0,
+      0x0,
+      0x0,
+      0x0,
+      0x0,
+      0x0,
+      0x0,
+    ],
+    "111111111146Momb",
+  ),
+  (
+    // prettier-ignore
       ?[
         0x0, 0x1, 0x11, 0xd3, 0x8e, 0x5f, 0xc9, 0x7, 0x1f, 0xfc,
         0xd2, 0xb, 0x4a, 0x76, 0x3c, 0xc9, 0xae, 0x4f, 0x25, 0x2b,
@@ -80,14 +113,14 @@ import {test} "mo:test";
         0x93, 0xff, 0x48, 0xd, 0x6d, 0xd4, 0x3d, 0xc6, 0x2a, 0x64,
         0x11, 0x55, 0xa5
       ],
-      "17mxz9b2TuLnDf6XyQrHjAc3UvMoEg7YzRsJkBd4VwNpFh8a1StKmCe5WtAW27Y"
-    ),
-    (
-      null,
-      "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL"
-    ),
-    (
-      // prettier-ignore
+    "17mxz9b2TuLnDf6XyQrHjAc3UvMoEg7YzRsJkBd4VwNpFh8a1StKmCe5WtAW27Y",
+  ),
+  (
+    null,
+    "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL",
+  ),
+  (
+    // prettier-ignore
       ?[
         0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
         0xb, 0xc, 0xd, 0xe, 0xf, 0x10, 0x11, 0x12, 0x13, 0x14,
@@ -116,20 +149,22 @@ import {test} "mo:test";
         0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa,
         0xfb, 0xfc, 0xfd, 0xfe, 0xff
       ],
-      "151KWPPBRzdWPr1ASeu172gVgLf1YfUp6VJyk6K9t4cLqYtFHcMa2iX8S3NJEprUcW7W5LvaPRpz7UG7puBj5STE3nKhCGt5eckYq7mMn5nT7oTTic2BAX6zDdqrmGCnkszQkzkz8e5QLGDjf7KeQgtEDm4UER6DMSdBjFQVa6cHrrJn9myVyyhUrsVnfUk2WmNFZvkWv3Tnvzo2cJ1xW62XDfUgYz1pd97eUGGPuXvDFfLsBVd1dfdUhPwxW7pMPgdWHTmg5uqKGFF6vE4xXpAqZTbTxRZjCDdTn68c2wrcxApm8hq3JX65Hix7VtcD13FF8b7BzBtwjXq1ze6NMjKgUcqpGV5XA5"
-    ),
-  ];
+    "151KWPPBRzdWPr1ASeu172gVgLf1YfUp6VJyk6K9t4cLqYtFHcMa2iX8S3NJEprUcW7W5LvaPRpz7UG7puBj5STE3nKhCGt5eckYq7mMn5nT7oTTic2BAX6zDdqrmGCnkszQkzkz8e5QLGDjf7KeQgtEDm4UER6DMSdBjFQVa6cHrrJn9myVyyhUrsVnfUk2WmNFZvkWv3Tnvzo2cJ1xW62XDfUgYz1pd97eUGGPuXvDFfLsBVd1dfdUhPwxW7pMPgdWHTmg5uqKGFF6vE4xXpAqZTbTxRZjCDdTn68c2wrcxApm8hq3JX65Hix7VtcD13FF8b7BzBtwjXq1ze6NMjKgUcqpGV5XA5",
+  ),
+];
 
 test(
   "encode",
   func() {
     for (i in Iter.range(0, testData.size() - 1)) {
-      ignore(do ? {
-        let input = testData[i].0!;
-        let expected = testData[i].1;
-        let actual = Base58Check.encode(input);
-        assert (expected == actual);
-      });
+      ignore (
+        do ? {
+          let input = testData[i].0!;
+          let expected = testData[i].1;
+          let actual = Base58Check.encode(input);
+          assert (expected == actual);
+        }
+      );
     };
   },
 );

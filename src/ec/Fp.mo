@@ -21,7 +21,7 @@ module {
     };
 
     // Compute value + other mod n.
-    public func add(other: Fp) : Fp = Fp(Field.add(value, other.value, n), n);
+    public func add(other : Fp) : Fp = Fp(Field.add(value, other.value, n), n);
 
     // Compute value * other mod n.
     public func mul(other : Fp) : Fp = Fp(Field.mul(value, other.value, n), n);
@@ -30,7 +30,7 @@ module {
     public func sqr() : Fp = Fp(Field.mul(value, value, n), n);
 
     // Compute value - other mod n.
-    public func sub(other: Fp) : Fp = Fp(Field.sub(value, other.value, n), n);
+    public func sub(other : Fp) : Fp = Fp(Field.sub(value, other.value, n), n);
 
     // Compute -value mod n.
     public func neg() : Fp = Fp(Field.neg(value, n), n);
@@ -39,7 +39,7 @@ module {
     public func isEqual(other : Fp) : Bool = other.value == value;
 
     // Compute value ** other mod n.
-    public func pow(exponent: Nat) : Fp = Fp(Field.pow(value, exponent, n), n);
+    public func pow(exponent : Nat) : Fp = Fp(Field.pow(value, exponent, n), n);
 
     // Compute sqrt(value) mod n.
     public func sqrt() : Fp {

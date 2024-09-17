@@ -3,9 +3,9 @@ import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Ripemd160 "../src/Ripemd160";
-import {test} "mo:test";
+import { test } "mo:test";
 
-let testData: [(Text, [Nat8])] = [
+let testData : [(Text, [Nat8])] = [
   (
     "",
     // prettier-ignore
@@ -69,42 +69,72 @@ let testData: [(Text, [Nat8])] = [
       0x52, 0x78, 0x32, 0x43, 0xc1, 0x69, 0x7b, 0xdb, 0xe1, 0x6d, 0x37, 0xf9, 0x7f,
       0x68, 0xf0, 0x83, 0x25, 0xdc, 0x15, 0x28
     ]
-  )
+  ),
 ];
 
-test("quick hash", func() {
-  for (i in Iter.range(0, testData.size() - 1)) {
-    let input : [Nat8] = Blob.toArray(Text.encodeUtf8(testData[i].0));
-    let expected : [Nat8] = testData[i].1;
-    let actual : [Nat8] = Ripemd160.hash(input);
+test(
+  "quick hash",
+  func() {
+    for (i in Iter.range(0, testData.size() - 1)) {
+      let input : [Nat8] = Blob.toArray(Text.encodeUtf8(testData[i].0));
+      let expected : [Nat8] = testData[i].1;
+      let actual : [Nat8] = Ripemd160.hash(input);
 
-    assert(expected == actual);
-  };
-});
+      assert (expected == actual);
+    };
+  },
+);
 
-test("write and reset", func() {
-  let digest : Ripemd160.Digest = Ripemd160.Digest();
-  for (i in Iter.range(0, testData.size() - 1)) {
-    let input : [Nat8] = Blob.toArray(Text.encodeUtf8(testData[i].0));
-    let expected : [Nat8] = testData[i].1;
+test(
+  "write and reset",
+  func() {
+    let digest : Ripemd160.Digest = Ripemd160.Digest();
+    for (i in Iter.range(0, testData.size() - 1)) {
+      let input : [Nat8] = Blob.toArray(Text.encodeUtf8(testData[i].0));
+      let expected : [Nat8] = testData[i].1;
 
-    digest.write(input);
-    let actual : [Nat8] = digest.sum();
+      digest.write(input);
+      let actual : [Nat8] = digest.sum();
 
-    assert(expected == actual);
+      assert (expected == actual);
 
-    digest.reset();
-  };
-});
+      digest.reset();
+    };
+  },
+);
 
-test("multiple writes", func() {
-  let digest : Ripemd160.Digest = Ripemd160.Digest();
-  digest.write(Blob.toArray(Text.encodeUtf8("abcdefg")));
-  digest.write(Blob.toArray(Text.encodeUtf8("hijklmn")));
-  digest.write(Blob.toArray(Text.encodeUtf8("opqrstu")));
-  digest.write(Blob.toArray(Text.encodeUtf8("vwxyz")));
+test(
+  "multiple writes",
+  func() {
+    let digest : Ripemd160.Digest = Ripemd160.Digest();
+    digest.write(Blob.toArray(Text.encodeUtf8("abcdefg")));
+    digest.write(Blob.toArray(Text.encodeUtf8("hijklmn")));
+    digest.write(Blob.toArray(Text.encodeUtf8("opqrstu")));
+    digest.write(Blob.toArray(Text.encodeUtf8("vwxyz")));
 
-  assert([
-    247, 28, 39, 16, 156, 105, 44, 27, 86, 187, 220, 235, 91, 157, 40, 101,
-    179, 112, 141, 188] == digest.sum());
-});
+    assert (
+      [
+        247,
+        28,
+        39,
+        16,
+        156,
+        105,
+        44,
+        27,
+        86,
+        187,
+        220,
+        235,
+        91,
+        157,
+        40,
+        101,
+        179,
+        112,
+        141,
+        188,
+      ] == digest.sum()
+    );
+  },
+);

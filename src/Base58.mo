@@ -43,7 +43,7 @@ module {
 
     // Skip leading spaces
     label l loop {
-      switch(current) {
+      switch (current) {
         case (?' ') {
           spaces := spaces + 1;
         };
@@ -59,7 +59,7 @@ module {
     var length : Nat = 0;
 
     label l loop {
-      switch(current) {
+      switch (current) {
         case (?'1') {
           zeroes := zeroes + 1;
         };
@@ -78,7 +78,7 @@ module {
     let b256 : [var Nat8] = Array.init<Nat8>(size, 0x00);
 
     label l loop {
-      switch(current) {
+      switch (current) {
         case (?' ') {
           break l;
         };
@@ -87,8 +87,9 @@ module {
         };
         case (?value) {
           var carry : Nat = Nat8.toNat(
-            mapBase58[Nat32.toNat(Char.toNat32(value))]);
-          assert(carry != 0xff);
+            mapBase58[Nat32.toNat(Char.toNat32(value))]
+          );
+          assert (carry != 0xff);
 
           var i : Nat = 0;
           var b256Pointer : Nat = b256.size() - 1;
@@ -105,7 +106,7 @@ module {
             b256Pointer -= 1;
           };
 
-          assert(carry == 0);
+          assert (carry == 0);
           length := i;
         };
       };
@@ -114,7 +115,7 @@ module {
 
     // Skip trailing spaces.
     label l loop {
-      switch(current) {
+      switch (current) {
         case (?' ') {};
         case (_) {
           break l;
@@ -124,7 +125,7 @@ module {
     };
 
     // Check all input was consumed.
-    assert(current == null);
+    assert (current == null);
 
     // Skip leading zeroes in base256 result.
     var b256Pointer : Nat = size - length;
@@ -132,14 +133,16 @@ module {
       b256Pointer += 1;
     };
 
-    let output = Array.tabulate<Nat8>(zeroes + b256.size() - b256Pointer,
+    let output = Array.tabulate<Nat8>(
+      zeroes + b256.size() - b256Pointer,
       func(i) {
         if (i < zeroes) {
           0x00;
         } else {
           b256[i + b256Pointer - zeroes];
         };
-    });
+      },
+    );
 
     return output;
   };
@@ -176,22 +179,25 @@ module {
         };
         b58Pointer -= 1;
       };
-      assert(carry == 0);
+      assert (carry == 0);
       length := i;
       inputPointer += 1;
     };
 
     // Skip leading zeroes in base58 result.
     var b58Pointer : Nat = size - length;
-    while (b58Pointer < b58.size() and b58[b58Pointer] == 0) { b58Pointer += 1; };
+    while (b58Pointer < b58.size() and b58[b58Pointer] == 0) { b58Pointer += 1 };
 
-    let output = Array.tabulate<Char>(zeroes + b58.size() - b58Pointer, func(i) {
-      if (i < zeroes) {
-        Char.fromNat32(0x31);
-      } else {
-        base58Alphabet[Nat8.toNat(b58[i + b58Pointer - zeroes])];
-      };
-    });
+    let output = Array.tabulate<Char>(
+      zeroes + b58.size() - b58Pointer,
+      func(i) {
+        if (i < zeroes) {
+          Char.fromNat32(0x31);
+        } else {
+          base58Alphabet[Nat8.toNat(b58[i + b58Pointer - zeroes])];
+        };
+      },
+    );
     return Text.fromIter(output.vals());
   };
 };

@@ -14,10 +14,10 @@ type TxInput = {
   vout : Nat32;
   seq : Nat32;
   sigder : [Nat8];
-  publicKey : [Nat8]
+  publicKey : [Nat8];
 };
 
-type TxOutput = {amount : Nat64; publicKey : [Nat8]};
+type TxOutput = { amount : Nat64; publicKey : [Nat8] };
 
 type TransactionTestCase = {
   version : Nat32;
@@ -28,29 +28,41 @@ type TransactionTestCase = {
 };
 
 func makeTransaction(testCase : TransactionTestCase) : Transaction.Transaction {
-  let txIns = Array.map<TxInput, TxInput.TxInput>(testCase.txIns,
-    func (input : TxInput) {
+  let txIns = Array.map<TxInput, TxInput.TxInput>(
+    testCase.txIns,
+    func(input : TxInput) {
       // Convert RPC byte-order to Internal byte-order.
-      let txid = Array.tabulate<Nat8>(input.txid.size(), func (n : Nat) {
-        input.txid[input.txid.size() - 1 - n]
-      });
+      let txid = Array.tabulate<Nat8>(
+        input.txid.size(),
+        func(n : Nat) {
+          input.txid[input.txid.size() - 1 - n];
+        },
+      );
       let tx = TxInput.TxInput(
-        {txid = Blob.fromArray(txid); vout = input.vout}, input.seq);
+        { txid = Blob.fromArray(txid); vout = input.vout },
+        input.seq,
+      );
       tx.script := [#data(input.sigder), #data(input.publicKey)];
-      tx
-    });
-  let txOuts = Array.map<TxOutput, TxOutput.TxOutput>(testCase.txOuts,
-    func (output : TxOutput) {
-      switch (P2pkh.makeScript(
-        P2pkh.deriveAddress(#Mainnet, (output.publicKey, Curves.secp256k1)))) {
+      tx;
+    },
+  );
+  let txOuts = Array.map<TxOutput, TxOutput.TxOutput>(
+    testCase.txOuts,
+    func(output : TxOutput) {
+      switch (
+        P2pkh.makeScript(
+          P2pkh.deriveAddress(#Mainnet, (output.publicKey, Curves.secp256k1))
+        )
+      ) {
         case (#ok script) {
-          TxOutput.TxOutput(output.amount, script)
+          TxOutput.TxOutput(output.amount, script);
         };
         case (#err msg) {
-          Debug.trap(msg)
+          Debug.trap(msg);
         };
       };
-    });
+    },
+  );
 
   let emptyWitness = Array.thaw<Witness.Witness>([]);
 
@@ -111,19 +123,17 @@ let transactionTestCases : [TransactionTestCase] = [{
         0x30, 0xc1, 0x8d, 0xf0, 0xa8, 0xe0, 0x49, 0x52, 0x23, 0xf6, 0x27, 0xae,
         0x38, 0xdf, 0x09, 0x92, 0xef, 0xb4, 0x77, 0x94, 0x75
       ]
-    }
+    },
   ];
-  txOuts = [
-    {
-      amount = 95000;
-      // prettier-ignore
+  txOuts = [{
+    amount = 95000;
+    // prettier-ignore
       publicKey = [
         0x03, 0x17, 0x10, 0x20, 0x58, 0x5c, 0x37, 0x23, 0xa0, 0x40, 0x29, 0xe5,
         0x61, 0xb8, 0x9e, 0xd2, 0xd5, 0xed, 0xf9, 0x04, 0xb6, 0xca, 0x58, 0x61,
         0xcd, 0x60, 0x92, 0xc1, 0x4c, 0x88, 0x04, 0x98, 0x0c
       ]
-    }
-  ];
+  }];
   // prettier-ignore
   expectedBytes = [
     0x01, 0x00, 0x00, 0x00, 0x02, 0x69, 0xad, 0xb4, 0x24, 0x22, 0xfb, 0x02,
@@ -168,14 +178,14 @@ func testTransactionToBytes(testCase : TransactionTestCase) {
   let transaction = makeTransaction(testCase);
   let actualBytes = transaction.toBytes();
 
-  assert(testCase.expectedBytes == actualBytes);
+  assert (testCase.expectedBytes == actualBytes);
 };
 
 func testTransactionId(testCase : TransactionTestCase) {
   let transaction = makeTransaction(testCase);
   let actualId = transaction.txid();
 
-  assert(testCase.expectedId == actualId);
+  assert (testCase.expectedId == actualId);
 };
 
 let runTest = TestUtils.runTestWithDefaults;
