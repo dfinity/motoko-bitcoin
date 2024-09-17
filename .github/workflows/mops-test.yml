@@ -1,4 +1,4 @@
-name: mops test
+name: Tests and formatting
 
 on:
   push:
@@ -32,10 +32,15 @@ jobs:
   format:
     name: Check formatting
     runs-on: ubuntu-22.04
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4.0.3
         with:
           node-version: "20"
-      - run: npm install --save-dev prettier prettier-plugin-motoko
-      - run: npx prettier --check --plugin=prettier-plugin-motoko **/*.mo
+
+      - name: Install prettier plugin
+        run: npm install --save-dev prettier prettier-plugin-motoko
+
+      - name: Run prettier check
+        run: npx prettier --check --plugin=prettier-plugin-motoko **/*.mo
