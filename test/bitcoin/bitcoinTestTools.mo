@@ -13,7 +13,7 @@ import Blob "mo:base/Blob";
 import Int "mo:base/Int";
 
 module {
-  public type Signature = {r : Nat; s : Nat};
+  public type Signature = { r : Nat; s : Nat };
   let curve = Curves.secp256k1;
 
   // Helper function for operating modulo the curve order.
@@ -24,16 +24,18 @@ module {
   // Helper class for assisting with signing with predetermined nonces.
   // Constructor is called with a private key and a list of signing nonce.
   // Each call to `sign` consumes a nonce.
-  public class EcdsaProxy(privateKey : Wif.WifPrivateKey,
-    signingNonces : [Nat]) {
+  public class EcdsaProxy(
+    privateKey : Wif.WifPrivateKey,
+    signingNonces : [Nat],
+  ) {
 
     var nextNonce : Nat = 0;
     let bitcoinPrivateKey = switch (Wif.decode(privateKey)) {
       case (#ok bitcoinPrivateKey) {
-        bitcoinPrivateKey
+        bitcoinPrivateKey;
       };
-      case (#err msg){
-        Debug.trap(msg)
+      case (#err msg) {
+        Debug.trap(msg);
       };
     };
 
@@ -42,7 +44,7 @@ module {
       let signature = ecdsaSign(
         bitcoinPrivateKey.key,
         signingNonces[nextNonce],
-        Blob.toArray(data)
+        Blob.toArray(data),
       );
       nextNonce += 1;
 
@@ -54,18 +56,22 @@ module {
 
     // Returns the public key associated to `bitcoinPrivateKey`.
     public func publicKey() : (Blob, Blob) {
-      let publicPoint = Jacobi.toAffine(Jacobi.mulBase(bitcoinPrivateKey.key,
-        Curves.secp256k1));
+      let publicPoint = Jacobi.toAffine(
+        Jacobi.mulBase(
+          bitcoinPrivateKey.key,
+          Curves.secp256k1,
+        )
+      );
 
       return switch (PublicKey.decode(#point publicPoint)) {
         case (#ok publicKey) {
           (
             Blob.fromArray(PublicKey.toSec1(publicKey, false).0),
-            Blob.fromArray([])
-          )
+            Blob.fromArray([]),
+          );
         };
         case (#err msg) {
-          Debug.trap(msg)
+          Debug.trap(msg);
         };
       };
     };
@@ -74,7 +80,8 @@ module {
     public func p2pkhAddress() : Types.P2PkhAddress {
       P2pkh.deriveAddress(
         bitcoinPrivateKey.network,
-        (Blob.toArray(publicKey().0), Curves.secp256k1));
+        (Blob.toArray(publicKey().0), Curves.secp256k1),
+      );
     };
   };
 
@@ -84,8 +91,8 @@ module {
   // `message` is the data to sign.
   func ecdsaSign(sk : Nat, rand : Nat, hash : [Nat8]) : Signature {
     let h = Common.readBE256(hash, 0);
-    switch(Jacobi.toAffine(Jacobi.mulBase(rand, Curves.secp256k1))) {
-      case (#point (x, _y, curve)) {
+    switch (Jacobi.toAffine(Jacobi.mulBase(rand, Curves.secp256k1))) {
+      case (#point(x, _y, curve)) {
         let r = x.value;
         if (r == 0) {
           Debug.trap("r = 0, use different rand.");
@@ -97,14 +104,14 @@ module {
           Debug.trap("s = 0, use different rand.");
         };
 
-        let finalS : Int = if (s.value > curve.r/2) {
-          curve.r - s.value
+        let finalS : Int = if (s.value > curve.r / 2) {
+          curve.r - s.value;
         } else {
-          s.value
+          s.value;
         };
-        return {r = r; s = Int.abs(finalS)};
+        return { r = r; s = Int.abs(finalS) };
       };
-      case (#infinity (_)) {
+      case (#infinity(_)) {
         Debug.trap("Computed infinity point, use different rand.");
       };
     };

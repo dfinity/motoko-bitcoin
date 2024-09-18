@@ -13,7 +13,7 @@ module {
 
   // Convert given number to binary represented as an array of Bool in reverse
   // order.
-  public func toBinaryReversed(a: Nat) : [Bool] {
+  public func toBinaryReversed(a : Nat) : [Bool] {
     let bitsBuffer = Buffer.Buffer<Bool>(256);
     var number : Nat = a;
 
@@ -28,13 +28,16 @@ module {
   // Convert given number to binary represented as an array of Bool.
   public func toBinary(a : Nat) : [Bool] {
     let reversedBinary = toBinaryReversed(a);
-    return Array.tabulate<Bool>(reversedBinary.size(), func (i) {
-      reversedBinary[reversedBinary.size() - i - 1];
-    });
+    return Array.tabulate<Bool>(
+      reversedBinary.size(),
+      func(i) {
+        reversedBinary[reversedBinary.size() - i - 1];
+      },
+    );
   };
 
   // Compute the Non-adjacent form representiation of the given integer.
-  public func toNaf(n : Int): [Int] {
+  public func toNaf(n : Int) : [Int] {
     var input : Int = n;
     let output = Buffer.Buffer<Int>(256);
 
@@ -53,5 +56,5 @@ module {
     };
 
     return Buffer.toArray(output);
-  }
+  };
 };

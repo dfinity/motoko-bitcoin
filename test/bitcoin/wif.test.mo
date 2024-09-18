@@ -12,7 +12,6 @@ type InvalidWifTestCase = {
   wif : Text;
 };
 
-
 let validWifTestCases : [ValidWifTestCase] = [
   {
     wif = "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn";
@@ -33,10 +32,10 @@ let validWifTestCases : [ValidWifTestCase] = [
     version = 0x80;
   },
   {
-   wif = "KzrA86mCVMGWnLGBQu9yzQa32qbxb5dvSK4XhyjjGAWSBKYX4rHx";
-   compressed = true;
-   privateKey = 48968302285117906840285529799176770990048954789747953886390402978935544927851;
-   version = 0x80;
+    wif = "KzrA86mCVMGWnLGBQu9yzQa32qbxb5dvSK4XhyjjGAWSBKYX4rHx";
+    compressed = true;
+    privateKey = 48968302285117906840285529799176770990048954789747953886390402978935544927851;
+    version = 0x80;
   },
   {
     wif = "5JdxzLtFPHNe7CAL8EBC6krdFv9pwPoRo4e3syMZEQT9srmK8hh";
@@ -67,7 +66,7 @@ let validWifTestCases : [ValidWifTestCase] = [
     compressed = false;
     privateKey = 70787862713293963375496916313032781152406131251747803633065018970699502141044;
     version = 0x80;
-  }
+  },
 ];
 
 let invalidWifTestCases : [InvalidWifTestCase] = [
@@ -90,25 +89,25 @@ let invalidWifTestCases : [InvalidWifTestCase] = [
   {
     // Invalid length.
     wif = "38uMpGARR2BJy5p4dNFKYg9UsWNoBtkpbdrXDjmfvz8krCtw3T1W92ZDSR";
-  }
+  },
 ];
 
 func testValidWifDecode(tcase : ValidWifTestCase) {
   switch (Wif.decode(tcase.wif)) {
-    case (#ok (privateKey)) {
-      assert(privateKey.key == tcase.privateKey);
-      assert(privateKey.compressedPublicKey == tcase.compressed);
+    case (#ok(privateKey)) {
+      assert (privateKey.key == tcase.privateKey);
+      assert (privateKey.compressedPublicKey == tcase.compressed);
     };
     case _ {
-      assert(false);
+      assert (false);
     };
   };
 };
 
 func testInvalidWifDecode(tcase : InvalidWifTestCase) {
   switch (Wif.decode(tcase.wif)) {
-    case (#ok (_privateKey)) {
-      assert(false);
+    case (#ok(_privateKey)) {
+      assert (false);
     };
     case _ {
       // Ok.

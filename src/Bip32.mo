@@ -33,9 +33,8 @@ module {
   // non-empty #fingerprint, will verify the fingerprint against those values.
   // If _parentPubKey is empty #fingerprint, will inherit the parsed fingerprint
   // without verification.
-  public func parse(bip32Key : Text, _parentPubKey : ?ParentPublicKey)
-  : ?ExtendedPublicKey {
-    switch(Base58Check.decode(bip32Key)) {
+  public func parse(bip32Key : Text, _parentPubKey : ?ParentPublicKey) : ?ExtendedPublicKey {
+    switch (Base58Check.decode(bip32Key)) {
       case (?b58Decoded) {
         let version : Nat32 = Common.readBE32(b58Decoded, 0);
         if (version != publicPrefix) {
@@ -43,17 +42,22 @@ module {
         };
 
         let depth : Nat8 = b58Decoded[4];
-        let fingerprint : [Nat8] = Array.tabulate<Nat8>(4, func (i) {
-          b58Decoded[5 + i];
-        });
+        let fingerprint : [Nat8] = Array.tabulate<Nat8>(
+          4,
+          func(i) {
+            b58Decoded[5 + i];
+          },
+        );
         let index : Nat32 = Common.readBE32(b58Decoded, 9);
         var parentPubKey = _parentPubKey;
 
         if (depth == 0) {
           // With depth = 0 we are parsing the master public key which must be
           // of index > 0 and does not have a parent.
-          if (parentPubKey != null or fingerprint != [0, 0, 0, 0] or
-            index > 0) {
+          if (
+            parentPubKey != null or fingerprint != [0, 0, 0, 0] or
+            index > 0
+          ) {
             return null;
           };
         } else {
@@ -77,27 +81,33 @@ module {
                   };
                 };
               } else {
-                parentPubKey := ?(#fingerprint (fingerprint));
+                parentPubKey := ?(#fingerprint(fingerprint));
               };
             };
             case (null) {
-               return null;
+              return null;
             };
           };
         };
 
-        let chaincode = Array.tabulate<Nat8>(32, func (i) {
-          b58Decoded[13 + i];
-        });
+        let chaincode = Array.tabulate<Nat8>(
+          32,
+          func(i) {
+            b58Decoded[13 + i];
+          },
+        );
 
         // Public key must start with 0x02 or 0x03.
         if (b58Decoded[45] != 0x02 and b58Decoded[45] != 0x03) {
           return null;
         };
 
-        let keyData = Array.tabulate<Nat8>(33, func (i) {
-          b58Decoded[45 + i];
-        });
+        let keyData = Array.tabulate<Nat8>(
+          33,
+          func(i) {
+            b58Decoded[45 + i];
+          },
+        );
 
         return switch (Affine.fromBytes(keyData, curve)) {
           case (null) {
@@ -118,7 +128,7 @@ module {
     };
   };
 
-  func isHardenedIndex(index: Nat32) : Bool {
+  func isHardenedIndex(index : Nat32) : Bool {
     return index >= 0x80000000; // 2**31
   };
 
@@ -130,9 +140,15 @@ module {
     // Initial size most suitable for single-digit indices
     let parsedPathBuffer : Buffer.Buffer<Nat32> = Buffer.Buffer(path.size() / 2);
 
-    let sanitized : Text = Text.replace(path, #predicate (func (c) {
-      c == '\n' or c == ' ' or c == '\r'
-    }), "");
+    let sanitized : Text = Text.replace(
+      path,
+      #predicate(
+        func(c) {
+          c == '\n' or c == ' ' or c == '\r';
+        }
+      ),
+      "",
+    );
 
     let tokens : Iter.Iter<Text> = Text.tokens(sanitized, #char '/');
     var first : Bool = true;
@@ -152,30 +168,30 @@ module {
 
       switch (Common.textToNat(token)) {
         case (?number) {
-           parsedPathBuffer.add(Nat32.fromNat(number));
-           first := false;
+          parsedPathBuffer.add(Nat32.fromNat(number));
+          first := false;
         };
         case (null) {
           return null;
         };
       };
     };
-    return ?parsedPathBuffer.toArray();
+    return ?Buffer.toArray(parsedPathBuffer);
   };
 
   // Representation of a BIP32 extended public key.
   public class ExtendedPublicKey(
-    _key: [Nat8],
+    _key : [Nat8],
     _chaincode : [Nat8],
-    _depth: Nat8,
-    _index: Nat32,
-    _parentPublicKey: ?ParentPublicKey
-    ) {
+    _depth : Nat8,
+    _index : Nat32,
+    _parentPublicKey : ?ParentPublicKey,
+  ) {
 
     public let key = _key;
     public let chaincode = _chaincode;
     public let depth = _depth;
-    public let index  = _index;
+    public let index = _index;
     public let parentPublicKey = _parentPublicKey;
 
     // Derive a child public key with path relative to this instance. Returns
@@ -183,17 +199,22 @@ module {
     public func derivePath(path : Path) : ?ExtendedPublicKey {
       return do ? {
         // Normalize the given path as an array of indices.
-        let pathArray : [Nat32] = switch(path) {
+        let pathArray : [Nat32] = switch (path) {
           case (#array path) {
-            path
+            path;
           };
           case (#text path) {
             arrayPathFromString(path)!;
           };
         };
 
-        var target : ExtendedPublicKey = ExtendedPublicKey(key, chaincode,
-          depth, index, parentPublicKey);
+        var target : ExtendedPublicKey = ExtendedPublicKey(
+          key,
+          chaincode,
+          depth,
+          index,
+          parentPublicKey,
+        );
 
         // Derive the hierarchy of child keys.
         for (childIndex in pathArray.vals()) {
@@ -206,7 +227,7 @@ module {
     // Derive child at the given index. Valid indices are in the range
     // [0, 2^31 - 1] and the function throws an error if given an index outside
     // this range.
-    public func deriveChild(index: Nat32) : ?ExtendedPublicKey {
+    public func deriveChild(index : Nat32) : ?ExtendedPublicKey {
       if (isHardenedIndex(index)) {
         return null;
       };
@@ -222,12 +243,18 @@ module {
       let fullNode : [Nat8] = Blob.toArray(hmacSha512.sum());
 
       // Split HMAC output into two 32-byte sequences.
-      let left : [Nat8] = Array.tabulate<Nat8>(32, func (i) {
-        fullNode[i];
-      });
-      let right: [Nat8] = Array.tabulate<Nat8>(32, func (i) {
-        fullNode[i + 32];
-      });
+      let left : [Nat8] = Array.tabulate<Nat8>(
+        32,
+        func(i) {
+          fullNode[i];
+        },
+      );
+      let right : [Nat8] = Array.tabulate<Nat8>(
+        32,
+        func(i) {
+          fullNode[i + 32];
+        },
+      );
 
       // Parse the left 32-bytes as an integer in the domain parameters of
       // secp2secp256k1 curve.
@@ -244,7 +271,7 @@ module {
         case (?parsedKey) {
           // Derive the child public key.
           switch (Jacobi.add(Jacobi.mulBase(multiplicand, curve), parsedKey)) {
-            case (#infinity (_)) {
+            case (#infinity(_)) {
               return null;
             };
             case (childPublicKey) {
@@ -253,7 +280,8 @@ module {
                 right,
                 depth + 1,
                 index,
-                ?(#publicKeyData key));
+                ?(#publicKeyData key),
+              );
             };
           };
         };
@@ -267,9 +295,9 @@ module {
 
       Common.writeBE32(result, 0, publicPrefix);
 
-      switch(parentPublicKey) {
+      switch (parentPublicKey) {
         case (null) {
-          result[4]:= 0x00;
+          result[4] := 0x00;
           Common.writeBE64(result, 5, 0x00);
         };
         case (?(#publicKeyData parentPublicKey)) {

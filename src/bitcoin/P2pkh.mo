@@ -25,8 +25,8 @@ module {
   // Create P2PKH script for the given P2PKH address.
   public func makeScript(address : Address) : Result.Result<Script, Text> {
     return switch (decodeAddress(address)) {
-      case (#ok {network = _; publicKeyHash}) {
-        #ok ([
+      case (#ok { network = _; publicKeyHash }) {
+        #ok([
           #opcode(#OP_DUP),
           #opcode(#OP_HASH160),
           #data(publicKeyHash),
@@ -93,7 +93,7 @@ module {
         #ok { network = #Testnet; publicKeyHash = publicKeyHash };
       };
       case (?(_networkId), ?_) {
-        #err ("Unrecognized network id.")
+        #err("Unrecognized network id.");
       };
       case _ {
         #err("Could not decode address.");

@@ -231,7 +231,7 @@ module {
     /// and
     /// [BIP342](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki).
     ///
-    /// This method traps if the `leaf_hash` is not 32 bytes long. 
+    /// This method traps if the `leaf_hash` is not 32 bytes long.
     public func createTaprootScriptSpendSignatureHash(
       amounts : [Nat64],
       scriptPubKey : Script.Script,

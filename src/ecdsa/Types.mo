@@ -18,7 +18,7 @@ module {
     #point : Affine.Point;
   };
 
-  public type Signature = {r : Nat; s : Nat};
+  public type Signature = { r : Nat; s : Nat };
   public type DerSignature = Blob;
   public type EncodedSignature = {
     #der : DerSignature;

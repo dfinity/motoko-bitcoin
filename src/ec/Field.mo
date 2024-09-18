@@ -8,7 +8,7 @@ module {
     let (gcd, x, _) = Numbers.eea(a, n);
 
     return if (gcd != 1) {
-      null
+      null;
     } else {
       let inverse = if (x < 0) x + n else x;
       ?Int.abs(inverse);
@@ -25,7 +25,7 @@ module {
     var result : Nat = 1;
 
     for (i in Iter.revRange(reversedBits.size() - 1, 0)) {
-      result :=  mul(result, result, n);
+      result := mul(result, result, n);
 
       if (reversedBits[Int.abs(i)]) {
         result := mul(result, a, n);
@@ -42,7 +42,7 @@ module {
       sum;
     } else {
       sum - n;
-    }
+    };
   };
 
   // Compute a * b  mod n.
@@ -53,10 +53,10 @@ module {
   // Compute a - b  mod n.
   public func sub(a : Nat, b : Nat, n : Nat) : Nat {
     return if (a >= b) {
-      a - b ;
+      a - b;
     } else {
       a + n - b;
-    }
+    };
   };
 
   // Compute -a  mod n.

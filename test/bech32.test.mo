@@ -70,29 +70,32 @@ let invalidChecksumBech32m : [Text] = [
   // Empty HRP.
   "16plkw9",
   // Empty HRP.
-  "1p2gdwpf"
+  "1p2gdwpf",
 ];
 
 func toLower(text : Text) : Text {
-  return Text.map(text, func (c) {
-    if (c >= 'A' and c <= 'Z') {
-      return Char.fromNat32(Char.toNat32(c) + 0x20);
-    };
-    return c;
-  });
+  return Text.map(
+    text,
+    func(c) {
+      if (c >= 'A' and c <= 'Z') {
+        return Char.fromNat32(Char.toNat32(c) + 0x20);
+      };
+      return c;
+    },
+  );
 };
 
 // Test checksum creation and validation.
 func testValidChecksumBech32(testCase : Text) {
-  switch(Bech32.decode(testCase)) {
-    case (#ok ((#BECH32, hrp, data))) {
+  switch (Bech32.decode(testCase)) {
+    case (#ok((#BECH32, hrp, data))) {
       let encoded : Text = Bech32.encode(hrp, data, #BECH32);
-      assert(toLower(testCase) == toLower(encoded));
+      assert (toLower(testCase) == toLower(encoded));
     };
-    case (#ok (_)) {
-      Debug.trap("Wrong encoding.")
+    case (#ok(_)) {
+      Debug.trap("Wrong encoding.");
     };
-    case (#err (msg)) {
+    case (#err(msg)) {
       Debug.trap(msg);
     };
   };
@@ -100,15 +103,15 @@ func testValidChecksumBech32(testCase : Text) {
 
 // Test checksum creation and validation.
 func testValidChecksumBech32m(testCase : Text) {
-  switch(Bech32.decode(testCase)) {
-    case (#ok ((#BECH32M, hrp, data))) {
+  switch (Bech32.decode(testCase)) {
+    case (#ok((#BECH32M, hrp, data))) {
       let encoded : Text = Bech32.encode(hrp, data, #BECH32M);
-      assert(toLower(testCase) == toLower(encoded));
+      assert (toLower(testCase) == toLower(encoded));
     };
-    case (#ok (_)) {
-      Debug.trap("Wrong encoding.")
+    case (#ok(_)) {
+      Debug.trap("Wrong encoding.");
     };
-    case (#err (msg)) {
+    case (#err(msg)) {
       Debug.trap(msg);
     };
   };
@@ -116,11 +119,11 @@ func testValidChecksumBech32m(testCase : Text) {
 
 // Test validation of invalid checksums.
 func testInvalidChecksumBech32(testCase : Text) {
-  switch(Bech32.decode(testCase)) {
-    case (#ok (_)) {
-      Debug.trap("Parsed invalid string.")
+  switch (Bech32.decode(testCase)) {
+    case (#ok(_)) {
+      Debug.trap("Parsed invalid string.");
     };
-    case (#err (_)) {
+    case (#err(_)) {
       // Test passed.
     };
   };
@@ -128,11 +131,11 @@ func testInvalidChecksumBech32(testCase : Text) {
 
 // Test validation of invalid checksums.
 func testInvalidChecksumBech32m(testCase : Text) {
-  switch(Bech32.decode(testCase)) {
-    case (#ok (_)) {
-      Debug.trap("Parsed invalid string.")
+  switch (Bech32.decode(testCase)) {
+    case (#ok(_)) {
+      Debug.trap("Parsed invalid string.");
     };
-    case (#err (_)) {
+    case (#err(_)) {
       // Test passed.
     };
   };

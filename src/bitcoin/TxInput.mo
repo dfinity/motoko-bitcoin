@@ -10,31 +10,31 @@ import Types "./Types";
 module {
   // Deserialize a TxInput  from bytes with layout:
   // | prevTxId | prevTx output index | script | sequence |
-  public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<TxInput, Text>{
+  public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<TxInput, Text> {
     let (prevTxId, prevTxOutputIndex, script, sequence) = switch (
       ByteUtils.read(data, 32, false),
       ByteUtils.readLE32(data),
       Script.fromBytes(data, true),
-      ByteUtils.readLE32(data)
+      ByteUtils.readLE32(data),
     ) {
       case (?prevTxId, ?prevTxOutputIndex, #ok script, ?sequence) {
-        (Blob.fromArray(prevTxId), prevTxOutputIndex, script, sequence)
+        (Blob.fromArray(prevTxId), prevTxOutputIndex, script, sequence);
       };
       case (null, _, _, _) {
-        return #err ("Could not read prevTxId.");
+        return #err("Could not read prevTxId.");
       };
       case (_, null, _, _) {
-        return #err ("Could not read prevTxOutputIndex.");
+        return #err("Could not read prevTxOutputIndex.");
       };
-      case (_, _, #err (msg), _) {
-        return #err ("Could not deserialize scriptSig: " # msg);
+      case (_, _, #err(msg), _) {
+        return #err("Could not deserialize scriptSig: " # msg);
       };
       case (_, _, _, null) {
-        return #err ("Could not read sequence.");
+        return #err("Could not read sequence.");
       };
     };
 
-    let txIn = TxInput({txid = prevTxId; vout = prevTxOutputIndex}, sequence);
+    let txIn = TxInput({ txid = prevTxId; vout = prevTxOutputIndex }, sequence);
     txIn.script := script;
 
     return #ok txIn;
@@ -77,7 +77,7 @@ module {
       Common.writeLE32(output, outputOffset, sequence);
       outputOffset += 4;
 
-      assert(outputOffset == output.size());
+      assert (outputOffset == output.size());
       return Array.freeze(output);
     };
   };

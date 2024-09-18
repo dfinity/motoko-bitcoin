@@ -59,9 +59,9 @@ let eeaTestVectors : [EeaTestVector] = [
   },
 ];
 
-func testEea({input; expected} : EeaTestVector) {
+func testEea({ input; expected } : EeaTestVector) {
   let actual = Numbers.eea(input.0, input.1);
-  assert(expected == actual);
+  assert (expected == actual);
 };
 
 let toBinaryTestVectors : [ToBinaryTestVector] = [
@@ -95,6 +95,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0x1e545442;
+    // prettier-ignore
     expected = [
       true, true, true, true, false, false, true, false, true, false, true,
       false, false, false, true, false, true, false, true, false, false, false,
@@ -103,6 +104,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0xe91c2b8e;
+    // prettier-ignore
     expected = [
       true, true, true, false, true, false, false, true, false, false, false,
       true, true, true, false, false, false, false, true, false, true, false,
@@ -111,6 +113,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0x7560804a;
+    // prettier-ignore
     expected = [
       true, true, true, false, true, false, true, false, true, true, false,
       false, false, false, false, true, false, false, false, false, false, false,
@@ -119,6 +122,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0xf9859ac1;
+    // prettier-ignore
     expected = [
       true, true, true, true, true, false, false, true, true, false, false,
       false, false, true, false, true, true, false, false, true, true, false,
@@ -127,6 +131,7 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
   },
   {
     input = 0x10471430;
+    // prettier-ignore
     expected = [
       true, false, false, false, false, false, true, false, false, false, true,
       true, true, false, false, false, true, false, true, false, false, false,
@@ -134,9 +139,9 @@ let toBinaryTestVectors : [ToBinaryTestVector] = [
     ];
   },
 ];
-func testToBinary({input; expected}: ToBinaryTestVector) {
+func testToBinary({ input; expected } : ToBinaryTestVector) {
   let actual = Numbers.toBinary(input);
-  assert(expected == actual);
+  assert (expected == actual);
 };
 
 let toNafTestVectors : [ToNafTestVector] = [
@@ -161,9 +166,9 @@ let toNafTestVectors : [ToNafTestVector] = [
     expected = [1, 0, -1, 0, 0, 0, 0, 0, -1, 0, 0, 0, -1, 0, -1, 0, 1];
   },
 ];
-func testToNaf({input; expected} : ToNafTestVector) {
+func testToNaf({ input; expected } : ToNafTestVector) {
   let actual = Numbers.toNaf(input);
-  assert(expected == actual);
+  assert (expected == actual);
 };
 
 let runTest = TestUtils.runTestWithDefaults;

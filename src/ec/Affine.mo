@@ -11,17 +11,17 @@ module {
   };
 
   // Check if the given point is valid.
-  public func isOnCurve(point: Point) : Bool {
+  public func isOnCurve(point : Point) : Bool {
     return switch point {
-      case (#infinity (_)) {
+      case (#infinity(_)) {
         true;
       };
-      case (#point (x, y, curve)) {
+      case (#point(x, y, curve)) {
         x.pow(3).add(
           x.mul(
             curve.Fp(curve.a)
           )
-        ).add(curve.Fp(curve.b)).isEqual(y.sqr())
+        ).add(curve.Fp(curve.b)).isEqual(y.sqr());
       };
     };
   };
@@ -29,10 +29,10 @@ module {
   // Check if the two given affine points are equal.
   public func isEqual(point1 : Point, point2 : Point) : Bool {
     return switch (point1, point2) {
-      case (#infinity (curve1), #infinity (curve2)) {
+      case (#infinity(curve1), #infinity(curve2)) {
         Curves.isEqual(curve1, curve2);
       };
-      case (#point (x1, y1, curve1), #point (x2, y2, curve2)) {
+      case (#point(x1, y1, curve1), #point(x2, y2, curve2)) {
         x1.isEqual(x2) and y1.isEqual(y2) and Curves.isEqual(curve1, curve2)
       };
       case _ {
@@ -46,7 +46,7 @@ module {
   // Returns null if data is not in correct format, data size is not exactly
   // equal to the serialized point size, or if deserialized point is not on the
   // given curve.
-  public func fromBytes(data : [Nat8], curve: Curves.Curve) : ?Point {
+  public func fromBytes(data : [Nat8], curve : Curves.Curve) : ?Point {
     let Fp = curve.Fp;
 
     // Min size
@@ -62,7 +62,7 @@ module {
         return null;
       };
       let y : Fp = Fp(Common.readBE256(data, 33));
-      #point (x, y, curve);
+      #point(x, y, curve);
     } else if (data[0] == 0x02 or data[0] == 0x03) {
       if (data.size() != 33) {
         return null;
@@ -75,7 +75,7 @@ module {
       let alpha : Fp = x.pow(3).add(x.mul(Fp(curve.a))).add(Fp(curve.b));
 
       // Solve for left side.
-      let beta :  Fp = alpha.sqrt();
+      let beta : Fp = alpha.sqrt();
 
       let (evenBeta, oddBeta) : (Fp, Fp) = if (beta.value % 2 == 0) {
         (beta, Fp(curve.p - beta.value));
@@ -84,27 +84,27 @@ module {
       };
 
       if (even) {
-        #point (x, evenBeta, curve)
+        #point(x, evenBeta, curve);
       } else {
-        #point (x, oddBeta, curve)
+        #point(x, oddBeta, curve);
       };
     } else {
       return null;
     };
     return if (isOnCurve(point)) {
-      ?point
+      ?point;
     } else {
-      null
+      null;
     };
   };
 
   // Serialize given point to bytes in SEC-1 format.
   public func toBytes(point : Point, compressed : Bool) : [Nat8] {
     switch point {
-      case (#infinity (_)) {
+      case (#infinity(_)) {
         return [];
       };
-      case (#point (x, y, _)) {
+      case (#point(x, y, _)) {
         return if (compressed) {
           let startByte : Nat8 = if (y.value % 2 == 0) 0x02 else 0x03;
           let output = Array.init<Nat8>(33, startByte);

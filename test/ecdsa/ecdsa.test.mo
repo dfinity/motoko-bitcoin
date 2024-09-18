@@ -12,14 +12,12 @@ type WycheproofEcdsaTestCase = WycheproofEcdsaTestVectors.WycheproofEcdsaTestCas
 let runTest = TestUtils.runTestWithDefaults;
 
 func testWycheproofEcdsa(testCase : WycheproofEcdsaTestCase) {
-  let (key, sig, msg) = switch(
+  let (key, sig, msg) = switch (
     Hex.decode(testCase.key),
     Hex.decode(testCase.sig),
-    Hex.decode(testCase.msg)
+    Hex.decode(testCase.msg),
   ) {
-    case (#ok (key), #ok (sig), #ok (msg)) {
-      (key, sig, msg)
-    };
+    case (#ok(key), #ok(sig), #ok(msg)) { (key, sig, msg) };
     case _ {
       // Converting data from hex failed.
       Debug.trap("Could not decode test data.");
@@ -27,17 +25,16 @@ func testWycheproofEcdsa(testCase : WycheproofEcdsaTestCase) {
   };
 
   switch (
-    PublicKey.decode(#sec1 (key, Curves.secp256k1)),
-    Der.decodeSignature(Blob.fromArray(sig))
-    ) {
-    case (#ok (publicKey), #ok (signature)) {
+    PublicKey.decode(#sec1(key, Curves.secp256k1)),
+    Der.decodeSignature(Blob.fromArray(sig)),
+  ) {
+    case (#ok(publicKey), #ok(signature)) {
       let actual = Ecdsa.verify(signature, publicKey, msg);
-      let expected =
-        testCase.result == "valid" or testCase.result == "acceptable";
-      assert(expected == actual);
+      let expected = testCase.result == "valid" or testCase.result == "acceptable";
+      assert (expected == actual);
     };
     case _ {
-      assert(testCase.result == "invalid");
+      assert (testCase.result == "invalid");
     };
   };
 };

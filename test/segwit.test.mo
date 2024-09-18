@@ -22,6 +22,7 @@ type InvalidAddressEncodingTestCase = {
 let validAddressTestCases : [ValidAddressTestCase] = [
   {
     address = "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4";
+    // prettier-ignore
     scriptPubKey = [
       0x00, 0x14, 0x75, 0x1e, 0x76, 0xe8, 0x19, 0x91, 0x96, 0xd4, 0x54,
       0x94, 0x1c, 0x45, 0xd1, 0xb3, 0xa3, 0x23, 0xf1, 0x43, 0x3b, 0xd6
@@ -29,6 +30,7 @@ let validAddressTestCases : [ValidAddressTestCase] = [
   },
   {
     address = "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7";
+    // prettier-ignore
     scriptPubKey = [
         0x00, 0x20, 0x18, 0x63, 0x14, 0x3c, 0x14, 0xc5, 0x16, 0x68, 0x04,
         0xbd, 0x19, 0x20, 0x33, 0x56, 0xda, 0x13, 0x6c, 0x98, 0x56, 0x78,
@@ -38,6 +40,7 @@ let validAddressTestCases : [ValidAddressTestCase] = [
   },
   {
     address = "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kt5nd6y";
+    // prettier-ignore
     scriptPubKey = [
        0x51, 0x28, 0x75, 0x1e, 0x76, 0xe8, 0x19, 0x91, 0x96, 0xd4, 0x54,
        0x94, 0x1c, 0x45, 0xd1, 0xb3, 0xa3, 0x23, 0xf1, 0x43, 0x3b, 0xd6,
@@ -48,11 +51,15 @@ let validAddressTestCases : [ValidAddressTestCase] = [
   {
     address = "BC1SW50QGDZ25J";
     scriptPubKey = [
-      0x60, 0x02, 0x75, 0x1e
-    ]
+      0x60,
+      0x02,
+      0x75,
+      0x1e,
+    ];
   },
   {
     address = "bc1zw508d6qejxtdg4y5r3zarvaryvaxxpcs";
+    // prettier-ignore
     scriptPubKey = [
       0x52, 0x10, 0x75, 0x1e, 0x76, 0xe8, 0x19, 0x91, 0x96, 0xd4, 0x54,
       0x94, 0x1c, 0x45, 0xd1, 0xb3, 0xa3, 0x23
@@ -60,6 +67,7 @@ let validAddressTestCases : [ValidAddressTestCase] = [
   },
   {
     address = "tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy";
+    // prettier-ignore
     scriptPubKey = [
       0x00, 0x20, 0x00, 0x00, 0x00, 0xc4, 0xa5, 0xca, 0xd4, 0x62, 0x21,
       0xb2, 0xa1, 0x87, 0x90, 0x5e, 0x52, 0x66, 0x36, 0x2b, 0x99, 0xd5,
@@ -69,6 +77,7 @@ let validAddressTestCases : [ValidAddressTestCase] = [
   },
   {
     address = "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c";
+    // prettier-ignore
     scriptPubKey = [
       0x51, 0x20, 0x00, 0x00, 0x00, 0xc4, 0xa5, 0xca, 0xd4, 0x62, 0x21,
       0xb2, 0xa1, 0x87, 0x90, 0x5e, 0x52, 0x66, 0x36, 0x2b, 0x99, 0xd5,
@@ -78,13 +87,14 @@ let validAddressTestCases : [ValidAddressTestCase] = [
   },
   {
     address = "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0";
+    // prettier-ignore
     scriptPubKey = [
       0x51, 0x20, 0x79, 0xbe, 0x66, 0x7e, 0xf9, 0xdc, 0xbb, 0xac, 0x55,
       0xa0, 0x62, 0x95, 0xce, 0x87, 0x0b, 0x07, 0x02, 0x9b, 0xfc, 0xdb,
       0x2d, 0xce, 0x28, 0xd9, 0x59, 0xf2, 0x81, 0x5b, 0x16, 0xf8, 0x17,
       0x98
     ]
-  }
+  },
 ];
 
 let invalidAddressesTestCases = [
@@ -143,7 +153,7 @@ let invalidAddressEncodingTestCases : [InvalidAddressEncodingTestCase] = [
   },
 ];
 
-func scriptPubKey({version; program} : Segwit.WitnessProgram) : [Nat8] {
+func scriptPubKey({ version; program } : Segwit.WitnessProgram) : [Nat8] {
   let output = Buffer.Buffer<Nat8>(program.size() + 2);
   if (version > 0) {
     output.add(version + 0x50);
@@ -161,40 +171,43 @@ func scriptPubKey({version; program} : Segwit.WitnessProgram) : [Nat8] {
 };
 
 func toLower(text : Text) : Text {
-  return Text.map(text, func (c) {
-    if (c >= 'A' and c <= 'Z') {
-      return Char.fromNat32(Char.toNat32(c) + 0x20);
-    };
-    return c;
-  });
+  return Text.map(
+    text,
+    func(c) {
+      if (c >= 'A' and c <= 'Z') {
+        return Char.fromNat32(Char.toNat32(c) + 0x20);
+      };
+      return c;
+    },
+  );
 };
 
 // Test whether valid addresses decode to the correct output.
 func testValidAddress(testCase : ValidAddressTestCase) {
   var hrp = "bc";
   let witnessProgram = switch (Segwit.decode(testCase.address)) {
-    case (#ok (hrp_decoded, witnessProgram)) {
+    case (#ok(hrp_decoded, witnessProgram)) {
       assert hrp_decoded == "bc" or hrp_decoded == "tb";
       hrp := hrp_decoded;
       witnessProgram;
     };
-    case (#err (msg)) {
+    case (#err(msg)) {
       Debug.trap(msg);
     };
   };
 
   let actual = scriptPubKey(witnessProgram);
-  assert(testCase.scriptPubKey == actual);
+  assert (testCase.scriptPubKey == actual);
 
   switch (Segwit.encode(hrp, witnessProgram)) {
-    case (#ok (recoded)) {
+    case (#ok(recoded)) {
       let lhs = toLower(testCase.address);
       let rhs = toLower(recoded);
       if (lhs != rhs) {
         Debug.trap(lhs # " != " # rhs);
       };
     };
-    case (#err (msg)) {
+    case (#err(msg)) {
       Debug.trap(msg);
     };
   };
@@ -203,10 +216,10 @@ func testValidAddress(testCase : ValidAddressTestCase) {
 // Test whether invalid addresses fail to decode.
 func testInvalidAddress(testCase : Text) {
   switch (Segwit.decode(testCase)) {
-    case (#ok (hrp, _witnessProgram)) {
+    case (#ok(hrp, _witnessProgram)) {
       assert hrp != "bc" and hrp != "tb";
     };
-    case (#err (_)) {
+    case (#err(_)) {
       // Test passed..
     };
   };
@@ -215,8 +228,8 @@ func testInvalidAddress(testCase : Text) {
 // Test whether address encoding fails on invalid input.
 func testInvalidAddressEncoding(testCase : InvalidAddressEncodingTestCase) {
   let program = Array.freeze(Array.init<Nat8>(testCase.programSize, 0));
-  switch (Segwit.encode(testCase.hrp, {version = testCase.version; program})) {
-    case (# ok (_)) {
+  switch (Segwit.encode(testCase.hrp, { version = testCase.version; program })) {
+    case (# ok(_)) {
       Debug.trap("Encode succeeds on invalid input.");
     };
     case _ {

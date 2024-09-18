@@ -13,7 +13,7 @@ type PublicKeyFromPointTestCase = {
   valid : Bool;
 };
 
-let publicKeyFromPointTestCases : [PublicKeyFromPointTestCase] =  [
+let publicKeyFromPointTestCases : [PublicKeyFromPointTestCase] = [
   {
     // Will be treated as infinity;
     coords = null;
@@ -29,7 +29,7 @@ let publicKeyFromPointTestCases : [PublicKeyFromPointTestCase] =  [
       0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8,
     );
     valid = true;
-  }
+  },
 ];
 
 let publicKeyFromBytesTestCases : [PublicKeyFromBytesTestCase] = [
@@ -42,6 +42,7 @@ let publicKeyFromBytesTestCases : [PublicKeyFromBytesTestCase] = [
     valid = false;
   },
   {
+    // prettier-ignore
     data = [
       0x03, 0x9a, 0xc8, 0xba, 0xc8, 0xf6, 0xd9, 0x16, 0xb8, 0xa8, 0x5b, 0x45,
       0x8e, 0x08, 0x7e, 0x0c, 0xd0, 0x7e, 0x6a, 0x76, 0xa6, 0xbf, 0xdd, 0xe9,
@@ -51,6 +52,7 @@ let publicKeyFromBytesTestCases : [PublicKeyFromBytesTestCase] = [
   },
   {
     // Bad uncompressed form.
+    // prettier-ignore
     data = [
       0x04, 0x9a, 0xc8, 0xba, 0xc8, 0xf6, 0xd9, 0x16, 0xb8, 0xa8, 0x5b, 0x45,
       0x8e, 0x08, 0x7e, 0x0c, 0xd0, 0x7e, 0x6a, 0x76, 0xa6, 0xbf, 0xdd, 0xe9,
@@ -60,22 +62,23 @@ let publicKeyFromBytesTestCases : [PublicKeyFromBytesTestCase] = [
   },
   {
     // Invalid type: 0x08.
+    // prettier-ignore
     data = [
       0x08, 0x9a, 0xc8, 0xba, 0xc8, 0xf6, 0xd9, 0x16, 0xb8, 0xa8, 0x5b, 0x45,
       0x8e, 0x08, 0x7e, 0x0c, 0xd0, 0x7e, 0x6a, 0x76, 0xa6, 0xbf, 0xdd, 0xe9,
       0xbb, 0x76, 0x6b, 0x17, 0x08, 0x6d, 0x9a, 0x5c, 0x8a
     ];
     valid = false;
-  }
+  },
 ];
 
 func testPublicKeyFromBytes(testCase : PublicKeyFromBytesTestCase) {
-  switch(PublicKey.decode(#sec1 (testCase.data, Curves.secp256k1))) {
+  switch (PublicKey.decode(#sec1(testCase.data, Curves.secp256k1))) {
     case (#ok(_pk)) {
-      assert(testCase.valid);
+      assert (testCase.valid);
     };
     case _ {
-      assert(not testCase.valid);
+      assert (not testCase.valid);
     };
   };
 };
@@ -84,18 +87,18 @@ func testPublicKeyFromPoint(testCase : PublicKeyFromPointTestCase) {
   let curve = Curves.secp256k1;
   let point : Affine.Point = switch (testCase.coords) {
     case (null) {
-      #infinity(curve)
+      #infinity(curve);
     };
     case (?(x, y)) {
-     #point (curve.Fp(x), curve.Fp(y), curve)
+      #point(curve.Fp(x), curve.Fp(y), curve);
     };
   };
-  switch(PublicKey.decode(#point (point))) {
+  switch (PublicKey.decode(#point(point))) {
     case (#ok(_pk)) {
-      assert(testCase.valid);
+      assert (testCase.valid);
     };
     case _ {
-      assert(not testCase.valid);
+      assert (not testCase.valid);
     };
   };
 };

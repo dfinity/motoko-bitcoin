@@ -8,23 +8,19 @@ import Text "mo:base/Text";
 module {
   // Read big endian 32-bit natural number starting at offset.
   public func readBE32(bytes : [Nat8], offset : Nat) : Nat32 {
-    Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 0])) << 24 |
-      Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 1])) << 16 |
-      Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 2])) << 8 |
-      Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 3]));
+    Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 0])) << 24 | Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 1])) << 16 | Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 2])) << 8 | Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 3]));
   };
 
   // Read big endian 64-bit natural number starting at offset.
-  public func readBE64(bytes: [Nat8], offset : Nat) : Nat64 {
+  public func readBE64(bytes : [Nat8], offset : Nat) : Nat64 {
     let first : Nat32 = readBE32(bytes, offset);
     let second : Nat32 = readBE32(bytes, offset + 4);
 
-    return Nat64.fromIntWrap(Nat32.toNat(first)) << 32 |
-      Nat64.fromIntWrap(Nat32.toNat(second));
+    return Nat64.fromIntWrap(Nat32.toNat(first)) << 32 | Nat64.fromIntWrap(Nat32.toNat(second));
   };
 
   // Read big endian 128-bit natural number starting at offset.
-  public func readBE128(bytes: [Nat8], offset: Nat) : Nat {
+  public func readBE128(bytes : [Nat8], offset : Nat) : Nat {
     let first : Nat64 = readBE64(bytes, offset);
     let second : Nat64 = readBE64(bytes, offset + 8);
 
@@ -32,9 +28,9 @@ module {
   };
 
   // Read big endian 256-bit natural number starting at offset.
-  public func readBE256(bytes: [Nat8], offset : Nat) : Nat {
+  public func readBE256(bytes : [Nat8], offset : Nat) : Nat {
     let first : Nat = readBE128(bytes, offset);
-    let second : Nat  = readBE128(bytes, offset + 16);
+    let second : Nat = readBE128(bytes, offset + 16);
 
     return first * 0x100000000000000000000000000000000 + second;
   };
@@ -67,7 +63,7 @@ module {
 
   // Write given value as 256-bit big endian into array starting at offset.
   public func writeBE256(bytes : [var Nat8], offset : Nat, value : Nat) {
-    let first : Nat = value / (2**128);
+    let first : Nat = value / (2 ** 128);
     let second : Nat = value - (first * 0x100000000000000000000000000000000);
 
     writeBE128(bytes, offset, first);
@@ -76,10 +72,7 @@ module {
 
   // Read little endian 32-bit natural number starting at offset.
   public func readLE32(bytes : [Nat8], offset : Nat) : Nat32 {
-    Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 3])) << 24 |
-      Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 2])) << 16 |
-      Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 1])) << 8 |
-      Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 0]));
+    Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 3])) << 24 | Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 2])) << 16 | Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 1])) << 8 | Nat32.fromIntWrap(Nat8.toNat(bytes[offset + 0]));
   };
 
   // Write given value as 16-bit little endian into array starting at offset.
@@ -110,10 +103,15 @@ module {
   };
 
   // Copy data from src into dest from/at the given offsets.
-  public func copy(dest: [var Nat8], destOffset : Nat, src: [Nat8],
-    srcOffset : Nat, count : Nat) {
-      for (i in Iter.range(0, count - 1)) {
-        dest[destOffset + i] := src[srcOffset + i];
+  public func copy(
+    dest : [var Nat8],
+    destOffset : Nat,
+    src : [Nat8],
+    srcOffset : Nat,
+    count : Nat,
+  ) {
+    for (i in Iter.range(0, count - 1)) {
+      dest[destOffset + i] := src[srcOffset + i];
     };
   };
 

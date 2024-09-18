@@ -309,8 +309,8 @@ module Script {
         0xb2;
       };
       case _ {
-        Debug.trap(debug_show("Unsupported opcode", opcode));
-      }
+        Debug.trap(debug_show ("Unsupported opcode", opcode));
+      };
     };
   };
 
@@ -319,166 +319,166 @@ module Script {
     return do ? {
       switch id {
         case 0x4c {
-          #OP_PUSHDATA1
+          #OP_PUSHDATA1;
         };
         case 0x4d {
-          #OP_PUSHDATA2
+          #OP_PUSHDATA2;
         };
         case 0x4e {
-          #OP_PUSHDATA4
+          #OP_PUSHDATA4;
         };
         case 0x4f {
-          #OP_1NEGATE
+          #OP_1NEGATE;
         };
         case 0x51 {
-          #OP_1
+          #OP_1;
         };
         case 0x52 {
-          #OP_2
+          #OP_2;
         };
         case 0x53 {
-          #OP_3
+          #OP_3;
         };
         case 0x54 {
-          #OP_4
+          #OP_4;
         };
         case 0x55 {
-          #OP_5
+          #OP_5;
         };
         case 0x56 {
-          #OP_6
+          #OP_6;
         };
         case 0x57 {
-          #OP_7
+          #OP_7;
         };
         case 0x58 {
-          #OP_8
+          #OP_8;
         };
         case 0x59 {
-          #OP_9
+          #OP_9;
         };
         case 0x5a {
-          #OP_10
+          #OP_10;
         };
         case 0x5b {
-          #OP_11
+          #OP_11;
         };
         case 0x5c {
-          #OP_12
+          #OP_12;
         };
         case 0x5d {
-          #OP_13
+          #OP_13;
         };
         case 0x5e {
-          #OP_14
+          #OP_14;
         };
         case 0x5f {
-          #OP_15
+          #OP_15;
         };
         case 0x60 {
-          #OP_16
+          #OP_16;
         };
         case 0x61 {
-          #OP_NOP
+          #OP_NOP;
         };
         case 0x62 {
-          #OP_VER
+          #OP_VER;
         };
-        case 0x63{
-          #OP_IF
+        case 0x63 {
+          #OP_IF;
         };
         case 0x65 {
-          #OP_VERIF
+          #OP_VERIF;
         };
         case 0x67 {
-          #OP_ELSE
+          #OP_ELSE;
         };
         case 0x68 {
-          #OP_ENDIF
+          #OP_ENDIF;
         };
         case 0x6a {
-          #OP_RETURN
+          #OP_RETURN;
         };
         case 0x6b {
-          #OP_TOALTSTACK
+          #OP_TOALTSTACK;
         };
         case 0x6f {
-          #OP_3DUP
+          #OP_3DUP;
         };
         case 0x75 {
-          #OP_DROP
+          #OP_DROP;
         };
         case 0x76 {
-          #OP_DUP
+          #OP_DUP;
         };
         case 0x77 {
-          #OP_NIP
+          #OP_NIP;
         };
         case 0x7c {
-          #OP_SWAP
+          #OP_SWAP;
         };
         case 0x79 {
-          #OP_PICK
+          #OP_PICK;
         };
         case 0x82 {
-          #OP_SIZE
+          #OP_SIZE;
         };
         case 0x87 {
-          #OP_EQUAL
+          #OP_EQUAL;
         };
         case 0x88 {
-          #OP_EQUALVERIFY
+          #OP_EQUALVERIFY;
         };
         case 0x8b {
-          #OP_1ADD
+          #OP_1ADD;
         };
         case 0x8c {
-          #OP_1SUB
+          #OP_1SUB;
         };
         case 0x91 {
-          #OP_NOT
+          #OP_NOT;
         };
         case 0x93 {
-          #OP_ADD
+          #OP_ADD;
         };
         case 0x9a {
-          #OP_BOOLAND
+          #OP_BOOLAND;
         };
         case 0x9d {
-          #OP_NUMEQUALVERIFY
+          #OP_NUMEQUALVERIFY;
         };
         case 0xa5 {
-          #OP_WITHIN
+          #OP_WITHIN;
         };
         case 0xa8 {
-          #OP_SHA256
+          #OP_SHA256;
         };
         case 0xa9 {
-          #OP_HASH160
+          #OP_HASH160;
         };
         case 0xaa {
-         #OP_HASH256
+          #OP_HASH256;
         };
         case 0xab {
-          #OP_CODESEPARATOR
+          #OP_CODESEPARATOR;
         };
         case 0xac {
-          #OP_CHECKSIG
+          #OP_CHECKSIG;
         };
         case 0xad {
-          #OP_CHECKSIGVERIFY
+          #OP_CHECKSIGVERIFY;
         };
         case 0xae {
-          #OP_CHECKMULTISIG
+          #OP_CHECKMULTISIG;
         };
         case 0xb1 {
-          #OP_CHECKLOCKTIMEVERIFY
+          #OP_CHECKLOCKTIMEVERIFY;
         };
         case 0xb2 {
-          #OP_CHECKSEQUENCEVERIFY
+          #OP_CHECKSEQUENCEVERIFY;
         };
         case _ {
-          null!
+          null!;
         };
       };
     };
@@ -488,24 +488,23 @@ module Script {
   // script size from data. Reading size is required when deserializing scripts
   // that were serialized as part of transactions. If readSize is false, will
   // read all bytes in data.
-  public func fromBytes(data : Iter.Iter<Nat8>, readSize : Bool)
-    : Result.Result<Script, Text> {
+  public func fromBytes(data : Iter.Iter<Nat8>, readSize : Bool) : Result.Result<Script, Text> {
     let size = if (readSize) {
       switch (ByteUtils.readVarint(data)) {
         case (?size) {
-          size
+          size;
         };
         case _ {
-          return #err ("Could not read size.");
+          return #err("Could not read size.");
         };
-      }
+      };
     } else {
-      0
+      0;
     };
 
     if (readSize and size == 0) {
       // Read a size equals zero, returning an empty script.
-      return #ok ([]);
+      return #ok([]);
     };
 
     // There is no trivial way of estimating the number of instructions
@@ -524,10 +523,10 @@ module Script {
           // read next.
           let dataSize = Nat8.toNat(encodedVal);
           totalReadCount += dataSize;
-          (#data (ByteUtils.read(data, dataSize, false)!))
+          (#data(ByteUtils.read(data, dataSize, false)!));
         } else {
           // Otherwise, it's an opcode.
-          (#opcode (decodeOpcode(encodedVal)!))
+          (#opcode(decodeOpcode(encodedVal)!));
         };
       };
 
@@ -535,35 +534,35 @@ module Script {
       // with the instruction.
       let readResult = do ? {
         switch (instruction) {
-          case (?(#opcode (#OP_PUSHDATA1))) {
+          case (?(#opcode(#OP_PUSHDATA1))) {
             let dataSize = Nat8.toNat(ByteUtils.readOne(data)!);
             totalReadCount += dataSize + 1;
-            instructionsBuf.add(#opcode (#OP_PUSHDATA1));
-            instructionsBuf.add(#data (ByteUtils.read(data, dataSize, false)!))
+            instructionsBuf.add(#opcode(#OP_PUSHDATA1));
+            instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
           };
-          case (?(#opcode (#OP_PUSHDATA2))) {
+          case (?(#opcode(#OP_PUSHDATA2))) {
             let dataSize = Nat16.toNat(ByteUtils.readLE16(data)!);
             totalReadCount += dataSize + 2;
-            instructionsBuf.add(#opcode (#OP_PUSHDATA2));
-            instructionsBuf.add(#data (ByteUtils.read(data, dataSize, false)!))
+            instructionsBuf.add(#opcode(#OP_PUSHDATA2));
+            instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
           };
-          case (?(#opcode (#OP_PUSHDATA4))) {
+          case (?(#opcode(#OP_PUSHDATA4))) {
             let dataSize = Nat32.toNat(ByteUtils.readLE32(data)!);
             totalReadCount += dataSize + 4;
-            instructionsBuf.add(#opcode (#OP_PUSHDATA4));
-            instructionsBuf.add(#data (ByteUtils.read(data, dataSize, false)!))
+            instructionsBuf.add(#opcode(#OP_PUSHDATA4));
+            instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
           };
           case (?instruction) {
-            instructionsBuf.add(instruction)
+            instructionsBuf.add(instruction);
           };
           case (null) {
-            return #err ("Could not decode opcode: " # Nat8.toText(encodedVal));
+            return #err("Could not decode opcode: " # Nat8.toText(encodedVal));
           };
         };
       };
 
       if (readResult == null) {
-        return #err ("Error docoding instruction.")
+        return #err("Error docoding instruction.");
       };
 
       // Check if the read size has been reached.
@@ -577,7 +576,7 @@ module Script {
     if (readSize and totalReadCount < size) {
       return #err "Truncated script.";
     };
-    return #ok (instructionsBuf.toArray());
+    return #ok(Buffer.toArray(instructionsBuf));
   };
 
   // Serialize given script to bytes.
@@ -623,13 +622,15 @@ module Script {
 
     // Prepend buffer size as varint and return.
     let encodedBufSize = ByteUtils.writeVarint(buf.size());
-    return Array.tabulate<Nat8>(encodedBufSize.size() + buf.size(),
-      func (i) {
+    return Array.tabulate<Nat8>(
+      encodedBufSize.size() + buf.size(),
+      func(i) {
         if (i < encodedBufSize.size()) {
           encodedBufSize[i];
         } else {
           buf.get(i - encodedBufSize.size());
         };
-      });
+      },
+    );
   };
 };

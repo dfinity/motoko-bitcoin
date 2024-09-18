@@ -33,14 +33,16 @@ func test(tcase : TestCase) {
   let (txData, scriptData, expectedResult) = switch (
     Hex.decode(tcase.tx),
     Hex.decode(tcase.script),
-    Hex.decode(tcase.expectedResult)
+    Hex.decode(tcase.expectedResult),
   ) {
     case (#ok tx, #ok script, #ok expectedResult) {
-      let revExpectedResult = Array.tabulate<Nat8>(expectedResult.size(),
-        func (i) {
-          expectedResult[expectedResult.size() - 1 - i]
-        });
-      (tx, script, revExpectedResult)
+      let revExpectedResult = Array.tabulate<Nat8>(
+        expectedResult.size(),
+        func(i) {
+          expectedResult[expectedResult.size() - 1 - i];
+        },
+      );
+      (tx, script, revExpectedResult);
     };
     case _ {
       Debug.trap("Could not decode test data");
@@ -49,11 +51,9 @@ func test(tcase : TestCase) {
 
   let (tx, script) = switch (
     Transaction.fromBytes(txData.vals()),
-    Script.fromBytes(scriptData.vals(), false)
+    Script.fromBytes(scriptData.vals(), false),
   ) {
-    case (#ok tx, #ok script) {
-      (tx, script)
-    };
+    case (#ok tx, #ok script) { (tx, script) };
     case (#ok tx, #err msg) {
       Debug.trap("Could not deserialize script data: " # msg);
     };
@@ -62,10 +62,10 @@ func test(tcase : TestCase) {
     };
   };
 
-  assert(tx.toBytes() == txData);
+  assert (tx.toBytes() == txData);
 
   let actualSighash = tx.createP2pkhSignatureHash(script, tcase.inputIndex, hashType);
-  assert(expectedResult == actualSighash);
+  assert (expectedResult == actualSighash);
 };
 
 runTest({
