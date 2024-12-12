@@ -1,3 +1,5 @@
+// @testmode wasi
+
 import Bip32 "../src/Bip32";
 import Iter "mo:base/Iter";
 import { test } "mo:test";

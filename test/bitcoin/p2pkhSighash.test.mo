@@ -1,3 +1,5 @@
+// @testmode wasi
+
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Int32 "mo:base/Int32";

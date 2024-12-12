@@ -1,3 +1,5 @@
+// @testmode wasi
+
 import PublicKey "../../src/ecdsa/Publickey";
 import WycheproofEcdsaTestVectors "./wycheproofEcdsaSecp256k1TestVectors";
 import Hex "../Hex";
