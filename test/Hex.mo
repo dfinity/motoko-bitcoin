@@ -64,7 +64,7 @@ module {
       switch (decodeChar(cs[j])) {
         case (#err(e)) { return #err(e) };
         case (#ok(x0)) {
-          switch (decodeChar(cs[j +1])) {
+          switch (decodeChar(cs[j + 1])) {
             case (#err(e)) { return #err(e) };
             case (#ok(x1)) {
               ns[i] := x0 * base + x1;

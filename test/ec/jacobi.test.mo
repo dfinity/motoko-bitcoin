@@ -109,7 +109,7 @@ func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
       // expects a 32-byte array.
       let alignedPrivateKey = Array.init<Nat8>(32, 0);
       for (i in Iter.range(0, Nat.min(privateKeyBytes.size() - 1, 31))) {
-        alignedPrivateKey[alignedPrivateKey.size() - 1 - i] := privateKeyBytes[privateKeyBytes.size() - 1 -i];
+        alignedPrivateKey[alignedPrivateKey.size() - 1 - i] := privateKeyBytes[privateKeyBytes.size() - 1 - i];
       };
       let privateKey : Nat = Common.readBE256(Array.freeze(alignedPrivateKey), 0);
 

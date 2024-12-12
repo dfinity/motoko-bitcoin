@@ -179,7 +179,7 @@ module {
       // Align to 32 bytes.
       let aligned : [var Nat8] = Array.init<Nat8>(32, 0);
       for (i in Iter.range(0, Nat.min(rData.size() - 1, 31))) {
-        aligned[aligned.size() - 1 - i] := rData[rData.size() - 1 -i];
+        aligned[aligned.size() - 1 - i] := rData[rData.size() - 1 - i];
       };
       Array.freeze(aligned);
     } else {
@@ -190,7 +190,7 @@ module {
       // Align to 32 bytes.
       let aligned : [var Nat8] = Array.init<Nat8>(32, 0);
       for (i in Iter.range(0, Nat.min(sData.size() - 1, 31))) {
-        aligned[aligned.size() - 1 - i] := sData[sData.size() - 1 -i];
+        aligned[aligned.size() - 1 - i] := sData[sData.size() - 1 - i];
       };
       Array.freeze(aligned);
     } else {
