@@ -1,3 +1,5 @@
+// @testmode wasi
+
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";

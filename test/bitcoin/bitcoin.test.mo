@@ -1,5 +1,3 @@
-// @testmode wasi
-
 import Bitcoin "../../src/bitcoin/Bitcoin";
 import Types "../../src/bitcoin/Types";
 import Script "../../src/bitcoin/Script";
