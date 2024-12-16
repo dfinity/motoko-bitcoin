@@ -1,3 +1,6 @@
+[![mops](https://oknww-riaaa-aaaam-qaf6a-cai.raw.ic0.app/badge/mops/bitcoin)](https://mops.one/bitcoin)
+[![documentation](https://oknww-riaaa-aaaam-qaf6a-cai.raw.ic0.app/badge/documentation/bitcoin)](https://mops.one/bitcoin/docs)
+
 # Algorithms for Bitcoin Integration in Motoko
 
 Requires the [`mops`](https://docs.mops.one/quick-start) package manager for Motoko.
