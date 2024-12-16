@@ -27,7 +27,7 @@ jobs:
         run: mops install
 
       - name: run tests
-        run: mops test --mode wasi
+        run: mops test
 
   format:
     name: Check formatting
