@@ -13,7 +13,7 @@ import ByteUtils "../ByteUtils";
 import Types "./Types";
 import TxInput "./TxInput";
 import TxOutput "./TxOutput";
-import Witness "Witness";
+import Witness "./Witness";
 import Sha256 "mo:sha2/Sha256";
 
 module {
@@ -104,7 +104,7 @@ module {
       };
     };
 
-    // build witnesses if necessary
+    // Build witnesses if necessary
     var witnesses = Array.init<Witness.Witness>(txInSize, []);
     if (has_witness) {
       for (i in Iter.range(0, txInSize - 1)) {
@@ -142,13 +142,14 @@ module {
 
   // Representation of a Bitcoin transaction.
   public class Transaction(
-    version : Nat32,
+    _version : Nat32,
     _txIns : [TxInput.TxInput],
     _txOuts : [TxOutput.TxOutput],
     _witnesses : [var Witness.Witness],
-    locktime : Nat32,
+    _locktime : Nat32,
   ) {
-
+    public let version : Nat32 = _version;
+    public let locktime : Nat32 = _locktime;
     public let txInputs : [TxInput.TxInput] = _txIns;
     public let txOutputs : [TxOutput.TxOutput] = _txOuts;
     public let witnesses : [var Witness.Witness] = _witnesses;
@@ -286,7 +287,7 @@ module {
       let scriptpubkeys = Array.init<[Nat8]>(txInputs.size(), Script.toBytes(scriptPubKey));
       let sha_scriptpubkeys : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, Array.flatten(Array.freeze(scriptpubkeys))));
 
-      // ignote the nSequence flag
+      // Ignore the nSequence flag
       // this is inlined generation of the 0xFFFFFFFF flag for each input
 
       // let sequences = Array.freeze(Array.init<Nat8>(txInputs.size() * 4, 0xFF));
@@ -348,6 +349,183 @@ module {
 
       return Hash.taggedHash(data, "TapSighash");
     };
+
+    // --- BIP 143 Helper Functions ---
+
+    // Serialize an OutPoint (TxId LE + Vout LE) - 36 bytes
+    // Made public in case it's useful externally, otherwise it can be a private `func`
+    public func serializeOutPoint(outpoint : Types.OutPoint) : [Nat8] {
+      // vout is Nat32, needs 4 bytes LE
+      let voutBytes = Array.init<Nat8>(4, 0);
+      Common.writeLE32(voutBytes, 0, outpoint.vout);
+      // txid is Blob (which is [Nat8]), assume it's already in the correct order (usually LE internally)
+      return Array.append(Blob.toArray(outpoint.txid), Array.freeze(voutBytes));
+    };
+
+    // Calculate hashPrevouts (DoubleSHA256 of the concatenation of all serialized OutPoints)
+    // Made public in case it's useful externally, otherwise it can be a private `func`
+    public func calculateHashPrevouts(self : Transaction) : [Nat8] {
+      // Buffer to store the serialized bytes of each outpoint
+      let buffer = Buffer.Buffer<Nat8>(self.txInputs.size() * 36); // Initial size estimate
+      for (input in self.txInputs.vals()) {
+        // Add the bytes of the serialized outpoint to the buffer
+        let serialized = serializeOutPoint(input.prevOutput);
+        for (byte in serialized.vals()) { buffer.add(byte) };
+      };
+      // Calculate the double SHA256 hash of all concatenated bytes in the buffer
+      return Hash.doubleSHA256(Buffer.toArray(buffer));
+    };
+
+    // Calculate hashSequence (DoubleSHA256 of the concatenation of all serialized sequences)
+    // Made public in case it's useful externally, otherwise it can be a private `func`
+    public func calculateHashSequence(self : Transaction) : [Nat8] {
+      // Buffer to store the serialized bytes of each sequence
+      let buffer = Buffer.Buffer<Nat8>(self.txInputs.size() * 4); // Each sequence is 4 bytes
+      for (input in self.txInputs.vals()) {
+        // Serialize the sequence (Nat32) to 4 bytes LE
+        let sequenceBytes = Array.init<Nat8>(4, 0);
+        Common.writeLE32(sequenceBytes, 0, input.sequence);
+        // Add the bytes to the buffer
+        for (byte in sequenceBytes.vals()) { buffer.add(byte) };
+      };
+      // Calculate the double SHA256 hash of all concatenated bytes in the buffer
+      return Hash.doubleSHA256(Buffer.toArray(buffer));
+    };
+
+    // Calculate hashOutputs (DoubleSHA256 of the concatenation of all serialized Outputs)
+    // Made public in case it's useful externally, otherwise it can be a private `func`
+    public func calculateHashOutputs(self : Transaction) : [Nat8] {
+      // Buffer to store the serialized bytes of each output
+      let buffer = Buffer.Buffer<Nat8>(self.txOutputs.size() * 34); // Estimate (8 value + 1 varint + 25 P2PKH script approx)
+      for (output in self.txOutputs.vals()) {
+        // Assume TxOutput.toBytes() serializes correctly (value LE 8 bytes + scriptPubKey VarInt + script)
+        let outputBytes = TxOutput.toBytes(output);
+        // Add the bytes to the buffer
+        for (byte in outputBytes.vals()) { buffer.add(byte) };
+      };
+      // Calculate the double SHA256 hash of all concatenated bytes in the buffer
+      return Hash.doubleSHA256(Buffer.toArray(buffer));
+    };
+
+    /// Create the BIP143 signature hash for a P2WPKH (Pay-to-Witness-Public-Key-Hash) input.
+    /// NOTE: This initial implementation ONLY supports SIGHASH_ALL.
+    /// Other sighash types (NONE, SINGLE, ANYONECANPAY) will require additional logic.
+    ///
+    /// # Parameters:
+    /// - `self`: The current transaction.
+    /// - `txInputIndex`: The 0-based index of the input being signed.
+    /// - `scriptCode`: The specific scriptCode for P2WPKH. Should be `0x19` (VarInt 25) followed by `OP_DUP OP_HASH160 <20-byte-pubkey-hash> OP_EQUALVERIFY OP_CHECKSIG`.
+    /// - `value`: The value (in satoshis) of the UTXO this input is spending.
+    /// - `sigHashType`: The signature hash type (e.g., `BitcoinTypes.SIGHASH_ALL`).
+    ///
+    /// # Returns:
+    /// `Result.Result<[Nat8], Text>` containing the 32-byte hash (`#ok`) or an error message (`#err`).
+    public func createP2wpkhSignatureHash(
+      self : Transaction,
+      txInputIndex : Nat32,
+      scriptCode : [Nat8], // Should be VarInt(len) + script (e.g., 0x1976a914{pkh}88ac)
+      value : Nat64, // Value of the spent UTXO
+      sigHashType : Types.SighashType,
+    ) : Result.Result<[Nat8], Text> {
+
+      // --- Basic Validation ---
+      let inputIdxNat = Nat32.toNat(txInputIndex);
+      if (inputIdxNat >= self.txInputs.size()) {
+        return #err(
+          "createP2wpkhSignatureHash: txInputIndex out of bounds ("
+          # Nat32.toText(txInputIndex) # " >= " # Nat.toText(self.txInputs.size()) # ")"
+        );
+      };
+
+      // --- SigHashType Validation and Handling (Simplified SIGHASH_ALL Version) ---
+      let sighash_mask = sigHashType & 0x1f; // Base mask (ignore ANYONECANPAY for now)
+      let anyone_can_pay = (sigHashType & Types.SIGHASH_ANYONECANPAY) != 0;
+
+      let ZERO_HASH = Array.init<Nat8>(32, 0); // Null 32-byte hash
+
+      // Variables for the hashes (could be zero depending on flags)
+      var hashPrevouts : [Nat8] = Array.freeze(ZERO_HASH);
+      var hashSequence : [Nat8] = Array.freeze(ZERO_HASH);
+      var hashOutputs : [Nat8] = Array.freeze(ZERO_HASH);
+
+      // Calculate hashPrevouts
+      if (anyone_can_pay) {
+        hashPrevouts := Array.freeze(ZERO_HASH);
+      } else {
+        hashPrevouts := self.calculateHashPrevouts(self);
+      };
+
+      // Calculate hashSequence
+      if (anyone_can_pay or sighash_mask == Types.SIGHASH_SINGLE or sighash_mask == Types.SIGHASH_NONE) {
+        hashSequence := Array.freeze(ZERO_HASH);
+      } else {
+        hashSequence := self.calculateHashSequence(self);
+      };
+
+      // Calculate hashOutputs
+      if (sighash_mask == Types.SIGHASH_SINGLE) {
+        // Only hash the output at the same index, if it exists
+        if (inputIdxNat < self.txOutputs.size()) {
+          let outputBytes = TxOutput.toBytes(self.txOutputs[inputIdxNat]);
+          hashOutputs := Hash.doubleSHA256(outputBytes);
+        } else {
+          // Invalid index for output (more inputs than outputs), zero hash is used
+          hashOutputs := Array.freeze(ZERO_HASH);
+        };
+      } else if (sighash_mask == Types.SIGHASH_NONE) {
+        hashOutputs := Array.freeze(ZERO_HASH);
+      } else {
+        // SIGHASH_ALL (or default)
+        hashOutputs := self.calculateHashOutputs(self);
+      };
+
+      // --- Get data from the specific Input ---
+      let input = self.txInputs[inputIdxNat];
+      let outpointBytes = self.serializeOutPoint(input.prevOutput); // 36 bytes
+      let sequenceBytes = Array.init<Nat8>(4, 0); // 4 bytes LE
+      Common.writeLE32(sequenceBytes, 0, input.sequence);
+
+      // --- Serialize other components ---
+      let versionBytes = Array.init<Nat8>(4, 0); // 4 bytes LE
+      Common.writeLE32(versionBytes, 0, self.version);
+
+      // `scriptCode` comes already serialized (VarInt + script)
+
+      let valueBytes = Array.init<Nat8>(8, 0); // 8 bytes LE
+      // Ensure Common.writeLE64 exists and works
+      // If not, implement or use Nat64.toByteDataLE() if it exists
+      Common.writeLE64(valueBytes, 0, value);
+
+      let locktimeBytes = Array.init<Nat8>(4, 0); // 4 bytes LE
+      Common.writeLE32(locktimeBytes, 0, self.locktime);
+
+      let hashtypeBytes = Array.init<Nat8>(4, 0); // 4 bytes LE
+      Common.writeLE32(hashtypeBytes, 0, sigHashType);
+
+      // --- Concatenate Preimage according to BIP 143 ---
+      // Order: version|hashPrevouts|hashSequence|outpoint|scriptCode|value|nSequence|hashOutputs|nLocktime|nHashType
+      let preimage = [
+        Array.freeze(versionBytes), // 4
+        hashPrevouts, // 32
+        hashSequence, // 32
+        outpointBytes, // 36
+        scriptCode, // variable (e.g., 26 for P2WPKH)
+        Array.freeze(valueBytes), // 8
+        Array.freeze(sequenceBytes), // 4
+        hashOutputs, // 32
+        Array.freeze(locktimeBytes), // 4
+        Array.freeze(hashtypeBytes) // 4
+      ];
+
+      // --- Calculate Final Hash (Double SHA256) ---
+      let sighash : [Nat8] = Hash.doubleSHA256(Array.flatten(preimage));
+
+      // Debug.print("Calculated P2WPKH Sighash (idx " # Nat32.toText(txInputIndex) # "): " # Blob.toHex(Blob.fromArray(sighash)));
+
+      return #ok(sighash);
+    };
+
+    // --- END: NEW BIP 143 FUNCTIONALITY ---
 
     /// Serialize transaction to bytes with layout:
     /// `| version | witness flags if it is present | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |`
@@ -620,4 +798,5 @@ module {
       Array.freeze(output);
     };
   };
+
 };

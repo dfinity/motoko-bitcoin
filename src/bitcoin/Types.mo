@@ -35,12 +35,23 @@ module {
   };
 
   public type P2PkhAddress = Text;
+  public type P2WPkhAddress = Text;
+  public type P2WShAddress = Text;
   public type P2trKeyAddress = Text;
   public type P2trScriptAddress = Text;
 
   public type Address = {
     #p2pkh : P2PkhAddress;
+    #p2wpkh : P2WPkhAddress;
+    #p2wsh : P2WShAddress;
     #p2tr_key : P2trKeyAddress;
     #p2tr_script : P2trScriptAddress;
+  };
+
+  public type BitcoinSendTransactionError = {
+    #MalformedTransaction : Text;
+    #QueueFull : Text;
+    #TemporarilyUnavailable : Text;
+    #Unknown : Text;
   };
 };
