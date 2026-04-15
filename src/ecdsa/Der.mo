@@ -44,7 +44,7 @@ module {
         };
       };
 
-      return outputBuf.toArray();
+      outputBuf.toArray();
     };
 
     let output = List.empty<Nat8>();

@@ -169,7 +169,7 @@ func scriptPubKey({ version; program } : Segwit.WitnessProgram) : [Nat8] {
     output.add(val);
   };
 
-  return List.toArray(output);
+  List.toArray(output);
 };
 
 func toLower(text : Text) : Text {

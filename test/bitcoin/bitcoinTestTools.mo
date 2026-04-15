@@ -52,7 +52,7 @@ module {
       let encodedOutput : [var Nat8] = VarArray.repeat<Nat8>(0, 64);
       Common.writeBE256(encodedOutput, 0, signature.r);
       Common.writeBE256(encodedOutput, 32, signature.s);
-      return Blob.fromArray(encodedOutput.toArray());
+      Blob.fromArray(encodedOutput.toArray());
     };
 
     // Returns the public key associated to `bitcoinPrivateKey`.
@@ -64,9 +64,9 @@ module {
         )
       );
 
-      return switch (PublicKey.decode(#point publicPoint)) {
+      switch (PublicKey.decode(#point publicPoint)) {
         case (#ok publicKey) {
-          (
+          return (
             Blob.fromArray(PublicKey.toSec1(publicKey, false).0),
             Blob.fromArray([]),
           );

@@ -112,7 +112,7 @@ module {
           },
         );
 
-        return switch (Affine.fromBytes(keyData, curve)) {
+        switch (Affine.fromBytes(keyData, curve)) {
           case (null) {
             return null;
           };
@@ -120,7 +120,7 @@ module {
             if (not Affine.isOnCurve(parsedPoint)) {
               return null;
             };
-            ?ExtendedPublicKey(keyData, chaincode, depth, index, parentPubKey);
+            return ?ExtendedPublicKey(keyData, chaincode, depth, index, parentPubKey);
           };
         };
       };
