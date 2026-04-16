@@ -270,7 +270,7 @@ module {
 
       let nLockTime_buffer = VarArray.repeat<Nat8>(0, 4);
       Common.writeLE32(nLockTime_buffer, 0, locktime);
-      let nLockTime : [Nat8] = Array.fromVarArray(nLockTime_buffer);
+      let nLockTime = nLockTime_buffer.toArray();
       let sha_prevouts : [Nat8] = Sha256.fromArray(#sha256, prevouts.flatten()).toArray();
 
       let amounts_bytes = amounts.map<Nat64, [Nat8]>(
