@@ -265,10 +265,12 @@ module {
 
       let sighash_type : [Nat8] = [0x00];
       let nVersion_buffer = VarArray.repeat<Nat8>(0, 4);
-      Common.writeLE32(nVersion_buffer, 0, 2);
+      Common.writeLE32(nVersion_buffer, 0, version);
       let nVersion = Array.fromVarArray<Nat8>(nVersion_buffer);
 
-      let nLockTime : [Nat8] = Array.fromVarArray(VarArray.repeat<Nat8>(0, 4));
+      let nLockTime_buffer = VarArray.repeat<Nat8>(0, 4);
+      Common.writeLE32(nLockTime_buffer, 0, locktime);
+      let nLockTime : [Nat8] = Array.fromVarArray(nLockTime_buffer);
       let sha_prevouts : [Nat8] = Sha256.fromArray(#sha256, prevouts.flatten()).toArray();
 
       let amounts_bytes = amounts.map<Nat64, [Nat8]>(
