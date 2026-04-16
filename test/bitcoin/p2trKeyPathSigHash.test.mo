@@ -1,6 +1,5 @@
 import Blob "mo:core/Blob";
 import Nat "mo:core/Nat";
-import Nat32 "mo:core/Nat32";
 import VarArray "mo:core/VarArray";
 
 import { expect; test } "mo:test";
