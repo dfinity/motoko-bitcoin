@@ -1,6 +1,6 @@
 import Runtime "mo:core/Runtime";
 
-import Field "./Field";
+import Field "Field";
 
 module {
   // Arithmetic computations modulo n over the given _value.

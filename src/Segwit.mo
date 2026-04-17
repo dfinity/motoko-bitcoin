@@ -1,11 +1,11 @@
 import List "mo:core/List";
-import { type Result; type Iter } "mo:core/Types";
 import Nat "mo:core/Nat";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
 import Runtime "mo:core/Runtime";
+import { type Result; type Iter } "mo:core/Types";
 
-import Bech32 "../src/Bech32";
+import Bech32 "Bech32";
 
 module {
 

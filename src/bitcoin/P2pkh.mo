@@ -3,11 +3,11 @@ import { type Result; type Iter } "mo:core/Types";
 
 import Base58Check "../Base58Check";
 import ByteUtils "../ByteUtils";
+import Hash "../Hash";
 import Ecdsa "../ecdsa/Ecdsa";
 import EcdsaTypes "../ecdsa/Types";
-import Hash "../Hash";
-import Script "./Script";
-import Types "./Types";
+import Script "Script";
+import Types "Types";
 
 module {
   type PublicKey = Ecdsa.PublicKey;
@@ -67,7 +67,7 @@ module {
         };
       },
     );
-    return Base58Check.encode(versionedHash);
+    Base58Check.encode(versionedHash);
   };
 
   // Decode P2PKH hash into its network and public key hash components.

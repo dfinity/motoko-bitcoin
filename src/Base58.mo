@@ -1,9 +1,9 @@
 import Array "mo:core/Array";
 import Char "mo:core/Char";
-import { type Iter } "mo:core/Types";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
 import Text "mo:core/Text";
+import { type Iter } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 module {
@@ -143,7 +143,7 @@ module {
       },
     );
 
-    return output;
+    output;
   };
 
   // Convert the given Base256 input to Base58.
@@ -197,6 +197,6 @@ module {
         };
       },
     );
-    return Text.fromIter(output.values());
+    Text.fromIter(output.values());
   };
 };

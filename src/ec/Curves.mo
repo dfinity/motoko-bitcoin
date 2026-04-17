@@ -1,4 +1,4 @@
-import Fp "./Fp";
+import Fp "Fp";
 
 module {
   public type Curve = {

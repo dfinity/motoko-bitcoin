@@ -40,7 +40,7 @@ module {
       oi += 1;
       i += 2;
     };
-    Array.fromVarArray(out);
+    out.toArray();
   };
 
   public func init() : Bench.V1 {

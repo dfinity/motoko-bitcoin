@@ -1,12 +1,11 @@
-import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import { type Iter; type Result } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 import ByteUtils "../ByteUtils";
 import Common "../Common";
-import Script "./Script";
-import Types "./Types";
+import Script "Script";
+import Types "Types";
 
 module {
   // Deserialize a TxInput  from bytes with layout:
@@ -79,7 +78,7 @@ module {
       outputOffset += 4;
 
       assert (outputOffset == output.size());
-      return Array.fromVarArray(output);
+      output.toArray();
     };
   };
 };

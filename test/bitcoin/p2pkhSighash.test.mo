@@ -6,7 +6,7 @@ import Runtime "mo:core/Runtime";
 
 import Hex "../Hex";
 import Script "../../src/bitcoin/Script";
-import TestCases "./p2pkhSighashTestVectors";
+import TestCases "p2pkhSighashTestVectors";
 import TestUtils "../TestUtils";
 import Transaction "../../src/bitcoin/Transaction";
 import Types "../../src/bitcoin/Types";

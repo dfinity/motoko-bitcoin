@@ -7,9 +7,9 @@ import Common "../../src/Common";
 import Curves "../../src/ec/Curves";
 import Hex "../Hex";
 import Jacobi "../../src/ec/Jacobi";
-import Secp256k1TestVectors "./Secp256k1TestVectors";
+import Secp256k1TestVectors "Secp256k1TestVectors";
 import TestUtils "../TestUtils";
-import WycheproofEcdhTestVectors "./wycheproofEcdhTestVectors";
+import WycheproofEcdhTestVectors "wycheproofEcdhTestVectors";
 
 type DoublingVector = Secp256k1TestVectors.DoublingVector;
 type MultiplicationVector = Secp256k1TestVectors.MultiplicationVector;
@@ -21,20 +21,14 @@ type WycheproofEcdhTestCase = WycheproofEcdhTestVectors.WycheproofEcdhTestCase;
 let runTest = TestUtils.runTestWithDefaults;
 
 func getSecp256k1Point(coords : ?(Nat, Nat)) : Jacobi.Point {
-  return switch (coords) {
+  switch (coords) {
     case (?(x, y)) {
       switch (Jacobi.fromNat(x, y, 1, Curves.secp256k1)) {
-        case (null) {
-          Runtime.trap("unreachable");
-        };
-        case (?point) {
-          point;
-        };
+        case (null) Runtime.trap("unreachable");
+        case (?point) point;
       };
     };
-    case (null) {
-      return #infinity(Curves.secp256k1);
-    };
+    case (null) #infinity(Curves.secp256k1);
   };
 };
 
@@ -111,7 +105,7 @@ func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
       for (i in Nat.range(0, Nat.min(privateKeyBytes.size(), 32))) {
         alignedPrivateKey[alignedPrivateKey.size() - 1 - i] := privateKeyBytes[privateKeyBytes.size() - 1 - i];
       };
-      let privateKey : Nat = Common.readBE256(Array.fromVarArray(alignedPrivateKey), 0);
+      let privateKey : Nat = Common.readBE256(alignedPrivateKey.toArray(), 0);
 
       // Read expected output. It is sometimes empty.
       let expectedOutput : ?Nat = if (outputBytes.size() > 0) {

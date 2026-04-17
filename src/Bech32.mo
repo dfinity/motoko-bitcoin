@@ -1,11 +1,11 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import Char "mo:core/Char";
-import { type Result } "mo:core/Types";
 import Nat "mo:core/Nat";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
 import Text "mo:core/Text";
+import { type Result } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 module {
@@ -71,7 +71,7 @@ module {
 
     assert output.size() <= 90;
 
-    return Text.fromArray(output);
+    Text.fromArray(output);
   };
 
   // Decode given text as Bech32 or Bech32m.
@@ -140,7 +140,7 @@ module {
       case (#ok(encodingType), ?hrp) {
         // Strip the 6 checksum values from the end of the data.
         let output = values.sliceToArray(0, -6);
-        return #ok(encodingType, hrp, output);
+        #ok(encodingType, hrp, output);
       };
       case _ {
         #err("Failed to decode HRP.");
@@ -162,7 +162,7 @@ module {
       output[i + hrpSize + 1] := currHrp & 0x1f;
     };
 
-    return Array.fromVarArray(output);
+    output.toArray();
   };
 
   // Constant value associated to the given encoding.
@@ -192,7 +192,7 @@ module {
     let mod : Nat32 = polymod(polyModValues) ^ encodingConstant(encoding);
 
     // Convert the 5-bit groups in mod to checksum data.
-    return Array.tabulate<Nat8>(
+    Array.tabulate<Nat8>(
       6,
       func(i) {
         Nat8.fromIntWrap(
@@ -209,7 +209,7 @@ module {
 
     let check : Nat32 = polymod(expandedHrp.concat(values));
 
-    return if (check == encodingConstant(#BECH32)) {
+    if (check == encodingConstant(#BECH32)) {
       #ok(#BECH32);
     } else if (check == encodingConstant(#BECH32M)) {
       #ok(#BECH32M);
@@ -235,7 +235,7 @@ module {
       if (c0 & 8 > 0) c ^= 0x3d4233dd;
       if (c0 & 16 > 0) c ^= 0x2a1462b3;
     };
-    return c;
+    c;
   };
 
   // If input corresponds to code of uppercase character, return code of its

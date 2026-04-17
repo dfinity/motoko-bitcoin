@@ -1,7 +1,7 @@
 import Array "mo:core/Array";
 import List "mo:core/List";
-import { type Result; type Iter } "mo:core/Types";
 import Nat "mo:core/Nat";
+import { type Result; type Iter } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 import ByteUtils "../ByteUtils";
@@ -25,7 +25,7 @@ module {
       buffer.add(size);
       buffer.add(witness_element);
     };
-    buffer.toArray().flatten<Nat8>();
+    buffer.toArray().flatten();
 
   };
 
@@ -52,7 +52,7 @@ module {
       };
       witness[i] := witness_element;
     };
-    let result = Array.fromVarArray(witness);
+    let result = witness.toArray();
     #ok result;
   };
 };

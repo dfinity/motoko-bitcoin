@@ -10,10 +10,10 @@ import Int "mo:core/Int";
 import Nat "mo:core/Nat";
 import Runtime "mo:core/Runtime";
 
-import Affine "./Affine";
-import BaseFp "./Fp";
-import Curves "./Curves";
-import Numbers "./Numbers";
+import Affine "Affine";
+import Curves "Curves";
+import BaseFp "Fp";
+import Numbers "Numbers";
 
 module {
   type Fp = BaseFp.Fp;
@@ -416,7 +416,7 @@ module {
 
   func fpFromInt(value : Int, curve : Curves.Curve) : Fp {
     let mod : Int = value % curve.p;
-    return if (mod < 0) {
+    if (mod < 0) {
       curve.Fp(Int.abs(mod + curve.p));
     } else {
       curve.Fp(Int.abs(mod));

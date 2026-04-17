@@ -105,7 +105,7 @@ module {
     public func sum() : Blob {
       let innerHash = innerDigest.sum().toArray();
       outerDigest.writeArray(innerHash);
-      return outerDigest.sum();
+      outerDigest.sum();
     };
   };
 };

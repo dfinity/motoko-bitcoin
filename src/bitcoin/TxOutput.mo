@@ -1,11 +1,10 @@
-import Array "mo:core/Array";
 import { type Iter; type Result } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 import ByteUtils "../ByteUtils";
 import Common "../Common";
-import Script "./Script";
-import Types "./Types";
+import Script "Script";
+import Types "Types";
 
 module {
   // Deserialize TxOutput from data with layout:
@@ -40,7 +39,7 @@ module {
       Common.writeLE64(output, 0, amount);
       Common.copy(output, 8, encodedScript, 0, encodedScript.size());
 
-      return Array.fromVarArray(output);
+      output.toArray();
     };
   };
 };

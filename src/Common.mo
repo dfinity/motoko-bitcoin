@@ -15,7 +15,7 @@ module {
     let first : Nat32 = readBE32(bytes, offset);
     let second : Nat32 = readBE32(bytes, offset + 4);
 
-    return Nat64.fromIntWrap(first.toNat()) << 32 | Nat64.fromIntWrap(second.toNat());
+    Nat64.fromIntWrap(first.toNat()) << 32 | Nat64.fromIntWrap(second.toNat());
   };
 
   // Read big endian 128-bit natural number starting at offset.
@@ -23,7 +23,7 @@ module {
     let first : Nat64 = readBE64(bytes, offset);
     let second : Nat64 = readBE64(bytes, offset + 8);
 
-    return first.toNat() * 0x10000000000000000 + second.toNat();
+    first.toNat() * 0x10000000000000000 + second.toNat();
   };
 
   // Read big endian 256-bit natural number starting at offset.
@@ -31,7 +31,7 @@ module {
     let first : Nat = readBE128(bytes, offset);
     let second : Nat = readBE128(bytes, offset + 16);
 
-    return first * 0x100000000000000000000000000000000 + second;
+    first * 0x100000000000000000000000000000000 + second;
   };
 
   // Write given value as 32-bit big endian into array starting at offset.

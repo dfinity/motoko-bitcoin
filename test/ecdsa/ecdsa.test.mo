@@ -9,7 +9,7 @@ import Ecdsa "../../src/ecdsa/Ecdsa";
 import Hex "../Hex";
 import PublicKey "../../src/ecdsa/Publickey";
 import TestUtils "../TestUtils";
-import WycheproofEcdsaTestVectors "./wycheproofEcdsaSecp256k1TestVectors";
+import WycheproofEcdsaTestVectors "wycheproofEcdsaSecp256k1TestVectors";
 
 type WycheproofEcdsaTestCase = WycheproofEcdsaTestVectors.WycheproofEcdsaTestCase;
 let runTest = TestUtils.runTestWithDefaults;

@@ -1,9 +1,8 @@
-import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 
 import Common "../Common";
-import Curves "./Curves";
-import FpBase "./Fp";
+import Curves "Curves";
+import FpBase "Fp";
 
 module {
   type Fp = FpBase.Fp;
@@ -111,12 +110,12 @@ module {
           let startByte : Nat8 = if (y.value % 2 == 0) 0x02 else 0x03;
           let output = VarArray.repeat<Nat8>(startByte, 33);
           Common.writeBE256(output, 1, x.value);
-          Array.fromVarArray(output);
+          output.toArray();
         } else {
           let output = VarArray.repeat<Nat8>(0x04, 65);
           Common.writeBE256(output, 1, x.value);
           Common.writeBE256(output, 33, y.value);
-          Array.fromVarArray(output);
+          output.toArray();
         };
       };
     };

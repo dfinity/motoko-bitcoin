@@ -5,7 +5,7 @@ import VarArray "mo:core/VarArray";
 
 import Sha256 "mo:sha2/Sha256";
 
-import Base58 "./Base58";
+import Base58 "Base58";
 
 module {
 
@@ -24,7 +24,7 @@ module {
     inputWithCheck[input.size() + 2] := hash[2];
     inputWithCheck[input.size() + 3] := hash[3];
 
-    return Base58.encode(Array.fromVarArray(inputWithCheck));
+    Base58.encode(inputWithCheck.toArray());
   };
 
   // Convert the given checked Base58 input to Base256. Returns null if the

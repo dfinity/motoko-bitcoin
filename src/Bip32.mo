@@ -1,19 +1,19 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
-import { type Iter } "mo:core/Types";
 import Iter "mo:core/Iter";
 import Nat "mo:core/Nat";
 import Nat32 "mo:core/Nat32";
 import Text "mo:core/Text";
+import { type Iter } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
-import Affine "./ec/Affine";
-import Base58Check "./Base58Check";
-import Common "./Common";
-import Curves "./ec/Curves";
-import Hash "./Hash";
-import Hmac "./Hmac";
-import Jacobi "./ec/Jacobi";
+import Affine "ec/Affine";
+import Base58Check "Base58Check";
+import Common "Common";
+import Curves "ec/Curves";
+import Hash "Hash";
+import Hmac "Hmac";
+import Jacobi "ec/Jacobi";
 
 module {
   public type Path = {
@@ -112,7 +112,7 @@ module {
           },
         );
 
-        return switch (Affine.fromBytes(keyData, curve)) {
+        switch (Affine.fromBytes(keyData, curve)) {
           case (null) {
             return null;
           };
@@ -120,7 +120,7 @@ module {
             if (not Affine.isOnCurve(parsedPoint)) {
               return null;
             };
-            ?ExtendedPublicKey(keyData, chaincode, depth, index, parentPubKey);
+            return ?ExtendedPublicKey(keyData, chaincode, depth, index, parentPubKey);
           };
         };
       };
@@ -151,7 +151,7 @@ module {
       "",
     );
 
-    let trimmed : Text = switch (Text.stripStart(sanitized, #text "m/")) {
+    let trimmed : Text = switch (sanitized.stripStart(#text "m/")) {
       case (?t) t;
       case (null) sanitized;
     };
@@ -240,7 +240,7 @@ module {
       Common.copy(hmacData, 0, key, 0, 33);
       Common.writeBE32(hmacData, 33, index);
       let hmacSha512 : Hmac.Hmac = Hmac.sha512(chaincode);
-      hmacSha512.writeArray(Array.fromVarArray(hmacData));
+      hmacSha512.writeArray(hmacData.toArray());
       let fullNode : [Nat8] = hmacSha512.sum().toArray();
 
       // Split HMAC output into two 32-byte sequences.
@@ -316,7 +316,7 @@ module {
       Common.copy(result, 13, chaincode, 0, 32);
       Common.copy(result, 45, key, 0, key.size());
 
-      return Base58Check.encode(Array.fromVarArray(result));
+      Base58Check.encode(result.toArray());
     };
   };
 };

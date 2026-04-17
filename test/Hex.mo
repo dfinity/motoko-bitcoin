@@ -2,7 +2,6 @@ import Nat "mo:core/Nat";
 // Hex decoding imported from
 // https://github.com/aviate-labs/encoding.mo/blob/main/src/Hex.mo to
 // facilitate in testing.
-import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 import Char "mo:core/Char";
 import Iter "mo:core/Iter";
@@ -75,6 +74,6 @@ module {
         };
       };
     };
-    #ok(Array.fromVarArray(ns));
+    #ok(ns.toArray());
   };
 };

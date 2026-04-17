@@ -1,12 +1,11 @@
-import Array "mo:core/Array";
-import { type Iter } "mo:core/Types";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat64 "mo:core/Nat64";
 import Nat8 "mo:core/Nat8";
+import { type Iter } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
-import Common "./Common";
+import Common "Common";
 
 module {
   // Read a number of elements from the given iterator and return as array. If
@@ -38,7 +37,7 @@ module {
         };
       };
 
-      Array.fromVarArray(readData);
+      readData.toArray();
     };
   };
 
@@ -110,18 +109,18 @@ module {
   public func writeVarint(value : Nat) : [Nat8] {
     assert (value < 0x10000000000000000);
 
-    return if (value < 0xfd) { [Nat8.fromIntWrap(value)] } else if (value < 0x10000) {
-      let result = VarArray.repeat<Nat8>(0xfd, 3);
-      Common.writeLE16(result, 1, Nat16.fromIntWrap(value));
-      Array.fromVarArray(result);
+    if (value < 0xfd) { [Nat8.fromIntWrap(value)] } else if (value < 0x10000) {
+      let buf = VarArray.repeat<Nat8>(0xfd, 3);
+      Common.writeLE16(buf, 1, Nat16.fromIntWrap(value));
+      buf.toArray();
     } else if (value < 0x100000000) {
-      let result = VarArray.repeat<Nat8>(0xfe, 5);
-      Common.writeLE32(result, 1, Nat32.fromIntWrap(value));
-      Array.fromVarArray(result);
+      let buf = VarArray.repeat<Nat8>(0xfe, 5);
+      Common.writeLE32(buf, 1, Nat32.fromIntWrap(value));
+      buf.toArray();
     } else {
-      let result = VarArray.repeat<Nat8>(0xff, 9);
-      Common.writeLE64(result, 1, Nat64.fromIntWrap(value));
-      Array.fromVarArray(result);
+      let buf = VarArray.repeat<Nat8>(0xff, 9);
+      Common.writeLE64(buf, 1, Nat64.fromIntWrap(value));
+      buf.toArray();
     };
   };
 };

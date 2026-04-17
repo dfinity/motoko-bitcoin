@@ -129,7 +129,7 @@ test(
         },
       );
       Common.writeBE32(output, 0, currentData.nat32);
-      assert (expected == Array.fromVarArray(output));
+      assert (expected == output.toArray());
     };
   },
 );
@@ -148,7 +148,7 @@ test(
         },
       );
       Common.writeBE64(output, 0, currentData.nat64);
-      assert (expected == Array.fromVarArray(output));
+      assert (expected == output.toArray());
     };
   },
 );
@@ -167,7 +167,7 @@ test(
         },
       );
       Common.writeBE128(output, 0, currentData.nat128);
-      assert (expected == Array.fromVarArray(output));
+      assert (expected == output.toArray());
     };
   },
 );
@@ -186,7 +186,7 @@ test(
         },
       );
       Common.writeBE256(output, 0, currentData.nat256);
-      assert (expected == Array.fromVarArray(output));
+      assert (expected == output.toArray());
     };
   },
 );
