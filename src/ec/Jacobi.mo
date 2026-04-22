@@ -10,10 +10,10 @@ import Int "mo:core/Int";
 import Nat "mo:core/Nat";
 import Runtime "mo:core/Runtime";
 
-import Affine "./Affine";
-import BaseFp "./Fp";
-import Curves "./Curves";
-import Numbers "./Numbers";
+import Affine "Affine";
+import Curves "Curves";
+import BaseFp "Fp";
+import Numbers "Numbers";
 
 module {
   type Fp = BaseFp.Fp;
@@ -236,12 +236,14 @@ module {
     let (XX, YY) = (X1 * X1 % p, Y1 * Y1 % p);
     let YYYY : Int = YY * YY % p;
     let ZZ : Int = Z1 * Z1 % p;
-    let S : Int = 2 * ((X1 + YY) ** 2 - XX - YYYY) % p;
-    let M : Int = (3 * XX + a * ZZ * ZZ) % p;
+    let S : Int = (X1 + YY) |> 2 * (_ * _ - XX - YYYY) % p;
+    let M : Int = if (a == 0) { 3 * XX % p } else {
+      (3 * XX + a * ZZ * ZZ) % p;
+    };
     let T : Int = (M * M - 2 * S) % p;
 
     let Y3 = (M * (S - T) - 8 * YYYY) % p;
-    let Z3 = ((Y1 + Z1) ** 2 - YY - ZZ) % p;
+    let Z3 = (Y1 + Z1) |> (_ * _ - YY - ZZ) % p;
 
     return (T, Y3, Z3);
   };
@@ -306,7 +308,7 @@ module {
     };
 
     let V : Int = X1 * I;
-    let X3 : Int = (r ** 2 - J - 2 * V) % p;
+    let X3 : Int = (r * r - J - 2 * V) % p;
     let Y3 : Int = (r * (V - X3) - 2 * Y1 * J) % p;
     let Z3 : Int = 2 * H % p;
 
@@ -416,7 +418,7 @@ module {
 
   func fpFromInt(value : Int, curve : Curves.Curve) : Fp {
     let mod : Int = value % curve.p;
-    return if (mod < 0) {
+    if (mod < 0) {
       curve.Fp(Int.abs(mod + curve.p));
     } else {
       curve.Fp(Int.abs(mod));

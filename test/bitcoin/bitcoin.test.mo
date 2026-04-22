@@ -5,7 +5,7 @@ import Runtime "mo:core/Runtime";
 
 import Address "../../src/bitcoin/Address";
 import Bitcoin "../../src/bitcoin/Bitcoin";
-import BitcoinTestTools "./bitcoinTestTools";
+import BitcoinTestTools "bitcoinTestTools";
 import Hex "../Hex";
 import Script "../../src/bitcoin/Script";
 import TestUtils "../TestUtils";

@@ -1,16 +1,15 @@
-import Array "mo:core/Array";
 import Nat "mo:core/Nat";
 import Nat64 "mo:core/Nat64";
 import VarArray "mo:core/VarArray";
 
-import Common "./Common";
+import Common "Common";
 
 module {
   // Hash the given array and return finalized result.
   public func hash(array : [Nat8]) : [Nat8] {
     let digest = Digest();
     digest.write(array);
-    return digest.sum();
+    digest.sum();
   };
 
   public class Digest() {
@@ -726,7 +725,7 @@ module {
         };
         // Add the count of processed bytes.
         bytes += 64 - Nat64.fromNat(bufsize);
-        transform(Array.fromVarArray(buf), 0);
+        transform(buf.toArray(), 0);
         // All data in the buffer has been processed, reset buffer data size
         // point transformOffset to index of not-yet processed data.
         transformOffset += 64 - bufsize;
@@ -758,8 +757,8 @@ module {
       let sizedesc : [var Nat8] = VarArray.repeat<Nat8>(0, 8);
       Common.writeLE64(sizedesc, 0, bytes << 3);
 
-      write(Array.fromVarArray(pad));
-      write(Array.fromVarArray(sizedesc));
+      write(pad.toArray());
+      write(sizedesc.toArray());
 
       let hash : [var Nat8] = VarArray.repeat<Nat8>(0, 20);
       Common.writeLE32(hash, 0, s[0]);
@@ -768,7 +767,7 @@ module {
       Common.writeLE32(hash, 12, s[3]);
       Common.writeLE32(hash, 16, s[4]);
 
-      return Array.fromVarArray(hash);
+      hash.toArray();
     };
   };
 };

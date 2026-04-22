@@ -1,14 +1,14 @@
 import Int "mo:core/Int";
 import Nat "mo:core/Nat";
 
-import Numbers "./Numbers";
+import Numbers "Numbers";
 
 module {
   // Compute a ** -1 mod n.
   public func inverse(a : Nat, n : Nat) : ?Nat {
     let (gcd, x, _) = Numbers.eea(a, n);
 
-    return if (gcd != 1) {
+    if (gcd != 1) {
       null;
     } else {
       let inverse = if (x < 0) x + n else x;
@@ -39,7 +39,7 @@ module {
   public func add(a : Nat, b : Nat, n : Nat) : Nat {
     let sum = a + b;
 
-    return if (sum < n) {
+    if (sum < n) {
       sum;
     } else {
       sum - n;

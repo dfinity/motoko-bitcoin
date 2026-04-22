@@ -1,20 +1,20 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import List "mo:core/List";
-import { type Result } "mo:core/Types";
 import Nat "mo:core/Nat";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
+import { type Result } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
-import Address "./Address";
 import Der "../ecdsa/Der";
-import Script "./Script";
-import Transaction "./Transaction";
-import TxInput "./TxInput";
-import TxOutput "./TxOutput";
-import Types "./Types";
-import Witness "./Witness";
+import Address "Address";
+import Script "Script";
+import Transaction "Transaction";
+import TxInput "TxInput";
+import TxOutput "TxOutput";
+import Types "Types";
+import Witness "Witness";
 
 module {
   type Utxo = Types.Utxo;
@@ -127,7 +127,7 @@ module {
 
     // Obtain the scriptPubKey of the source address which is also the
     // scriptPubKey of the Tx output being spent.
-    return switch (Address.scriptPubKey(sourceAddress)) {
+    switch (Address.scriptPubKey(sourceAddress)) {
       case (#ok scriptPubKey) {
         // Obtain scriptSigs for each Tx input.
         let scriptSigs = Array.tabulate<Script.Script>(
@@ -198,7 +198,7 @@ module {
     fees : Satoshi,
   ) : Result<Transaction.Transaction, Text> {
 
-    return switch (
+    switch (
       buildTransaction(
         version,
         utxos,

@@ -1,10 +1,10 @@
 import Array "mo:core/Array";
 import List "mo:core/List";
-import { type Iter; type Result } "mo:core/Types";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
 import Runtime "mo:core/Runtime";
+import { type Iter; type Result } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 import ByteUtils "../ByteUtils";
@@ -623,7 +623,7 @@ module Script {
 
     // Prepend buffer size as varint and return.
     let encodedBufSize = ByteUtils.writeVarint(buf.size());
-    return Array.tabulate<Nat8>(
+    Array.tabulate<Nat8>(
       encodedBufSize.size() + buf.size(),
       func(i) {
         if (i < encodedBufSize.size()) {

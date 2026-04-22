@@ -7,7 +7,7 @@ import Nat8 "mo:core/Nat8";
 module {
   // Read big endian 32-bit natural number starting at offset.
   public func readBE32(bytes : [Nat8], offset : Nat) : Nat32 {
-    Nat32.fromIntWrap(bytes[offset + 0].toNat()) << 24 | Nat32.fromIntWrap(bytes[offset + 1].toNat()) << 16 | Nat32.fromIntWrap(bytes[offset + 2].toNat()) << 8 | Nat32.fromIntWrap(bytes[offset + 3].toNat());
+    bytes[offset + 0].toNat16().toNat32() << 24 | bytes[offset + 1].toNat16().toNat32() << 16 | bytes[offset + 2].toNat16().toNat32() << 8 | bytes[offset + 3].toNat16().toNat32();
   };
 
   // Read big endian 64-bit natural number starting at offset.
@@ -15,7 +15,7 @@ module {
     let first : Nat32 = readBE32(bytes, offset);
     let second : Nat32 = readBE32(bytes, offset + 4);
 
-    return Nat64.fromIntWrap(first.toNat()) << 32 | Nat64.fromIntWrap(second.toNat());
+    first.toNat64() << 32 | second.toNat64();
   };
 
   // Read big endian 128-bit natural number starting at offset.
@@ -23,7 +23,7 @@ module {
     let first : Nat64 = readBE64(bytes, offset);
     let second : Nat64 = readBE64(bytes, offset + 8);
 
-    return first.toNat() * 0x10000000000000000 + second.toNat();
+    first.toNat() * 0x10000000000000000 + second.toNat();
   };
 
   // Read big endian 256-bit natural number starting at offset.
@@ -31,7 +31,7 @@ module {
     let first : Nat = readBE128(bytes, offset);
     let second : Nat = readBE128(bytes, offset + 16);
 
-    return first * 0x100000000000000000000000000000000 + second;
+    first * 0x100000000000000000000000000000000 + second;
   };
 
   // Write given value as 32-bit big endian into array starting at offset.
@@ -71,7 +71,7 @@ module {
 
   // Read little endian 32-bit natural number starting at offset.
   public func readLE32(bytes : [Nat8], offset : Nat) : Nat32 {
-    Nat32.fromIntWrap(bytes[offset + 3].toNat()) << 24 | Nat32.fromIntWrap(bytes[offset + 2].toNat()) << 16 | Nat32.fromIntWrap(bytes[offset + 1].toNat()) << 8 | Nat32.fromIntWrap(bytes[offset + 0].toNat());
+    bytes[offset + 3].toNat16().toNat32() << 24 | bytes[offset + 2].toNat16().toNat32() << 16 | bytes[offset + 1].toNat16().toNat32() << 8 | bytes[offset + 0].toNat16().toNat32();
   };
 
   // Write given value as 16-bit little endian into array starting at offset.

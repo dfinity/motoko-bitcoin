@@ -4,7 +4,7 @@ import Text "mo:core/Text";
 
 import Sha256 "mo:sha2/Sha256";
 
-import Ripemd160 "./Ripemd160";
+import Ripemd160 "Ripemd160";
 
 module {
   // Applies SHA256 followed by RIPEMD160 on the given data.

@@ -1,23 +1,25 @@
 import Array "mo:core/Array";
-import Char "mo:core/Char";
-import { type Iter } "mo:core/Types";
+import Blob "mo:core/Blob";
+import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
+import Nat64 "mo:core/Nat64";
 import Nat8 "mo:core/Nat8";
+import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
 import VarArray "mo:core/VarArray";
 
 module {
   // All alphanumeric characters except for "0", "I", "O", and "l".
   // prettier-ignore
-  private let base58Alphabet : [Char] = [
-    '1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G',
-    'H','J','K','L','M','N','P','Q','R','S','T','U','V','W','X','Y','Z',
-    'a','b','c','d','e','f','g','h','i','j','k','m','n','o','p','q','r',
-    's','t','u','v','w','x','y','z'
+  private let base58Alphabet : [Nat8] = [
+    49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71,
+    72, 74, 75, 76, 77, 78, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+    97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 109, 110, 111, 112, 113, 114,
+    115, 116, 117, 118, 119, 120, 121, 122
   ];
 
   // prettier-ignore
-  private let mapBase58 : [Nat8] = [
+  private let mapBase58 : [Nat] = [
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255,
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255,
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255, 255, 0,
@@ -36,167 +38,198 @@ module {
     255,255,255,255,255,255,255,255,
   ];
 
-  // Convert the given Base58 input to Base256.
-  public func decode(input : Text) : [Nat8] {
-    let inputIter : Iter<Char> = input.chars();
-    var current : ?Char = inputIter.next();
-    var spaces : Nat = 0;
+  func arrayToText(arr : [Nat8]) : Text {
+    switch (Blob.fromArray(arr).decodeUtf8()) {
+      case (?t) t;
+      case null Runtime.trap("unreachable");
+    };
+  };
 
-    // Skip leading spaces
-    label l loop {
-      switch (current) {
-        case (?' ') {
-          spaces := spaces + 1;
-        };
-        case (_) {
-          break l;
-        };
-      };
-      current := inputIter.next();
+  // Convert the given Base58 input to Base256.
+  public func decode(input_ : Text) : [Nat8] {
+    let input : Blob = Text.encodeUtf8(input_);
+    let inputSize = input.size();
+    var pos : Nat = 0;
+
+    // Skip leading spaces.
+    while (pos < inputSize and input[pos] == 0x20) {
+      pos += 1;
     };
 
     // Skip and count leading '1's.
-    var zeroes : Nat = 0;
+    let startPos = pos;
+    while (pos < inputSize and input[pos] == 0x31) {
+      pos += 1;
+    };
+    let zeroes : Nat = pos - startPos;
+
+    // Find end of base58 payload (before trailing spaces).
+    var endPos = inputSize;
+    while (endPos > pos and input[endPos - 1] == 0x20) {
+      endPos -= 1;
+    };
+    let digitCount : Nat = endPos - pos;
+
+    // Allocate base256 buffer: log(58)/log(256) ≈ 733/1000.
+    let size : Nat = digitCount * 733 / 1000 + 1;
+    let b256 : [var Nat16] = VarArray.repeat<Nat16>(0x00, size);
     var length : Nat = 0;
 
-    label l loop {
-      switch (current) {
-        case (?'1') {
-          zeroes := zeroes + 1;
-        };
-        case (_) {
-          break l;
-        };
+    // Process leading remainder digits (digitCount % 8) one at a time.
+    let remainder = digitCount % 8;
+    var rem : Nat = 0;
+    while (rem < remainder) {
+      var carry : Nat16 = Nat16.fromIntWrap(mapBase58[input[pos].toNat()]);
+      assert (carry != 0xff);
+
+      var i : Nat = 0;
+      var j : Nat = size - 1;
+      label inner while (carry != 0 or i < length) {
+        carry +%= 58 * b256[j];
+        b256[j] := (carry & 0xff);
+        carry >>= 8;
+        i += 1;
+        if (j == 0) break inner;
+        j -= 1;
       };
-      current := inputIter.next();
+
+      assert (carry == 0);
+      length := i;
+      pos += 1;
+      rem += 1;
     };
 
-    // Compute how many bytes are needed for the Base256 representation. We
-    // need log(58) / log(256) of one byte to represent a Base58 digit in
-    // Base256, which is approximately 733 / 1000. The input size is multiplied
-    // by this value and rounded up to get the total Base256 required size.
-    let size : Nat = (input.size() - zeroes - spaces) * 733 / 1000 + 1;
-    let b256 : [var Nat8] = VarArray.repeat<Nat8>(0x00, size);
+    // Process full batches of 8 digits: b256 = b256 * 58^8 + v.
+    // 58^8 = 128_063_081_718_016. Max carry < 2^55, fits in Nat64.
+    while (pos < endPos) {
+      let d0 = Nat64.fromIntWrap(mapBase58[input[pos].toNat()]);
+      let d1 = Nat64.fromIntWrap(mapBase58[input[pos + 1].toNat()]);
+      let d2 = Nat64.fromIntWrap(mapBase58[input[pos + 2].toNat()]);
+      let d3 = Nat64.fromIntWrap(mapBase58[input[pos + 3].toNat()]);
+      let d4 = Nat64.fromIntWrap(mapBase58[input[pos + 4].toNat()]);
+      let d5 = Nat64.fromIntWrap(mapBase58[input[pos + 5].toNat()]);
+      let d6 = Nat64.fromIntWrap(mapBase58[input[pos + 6].toNat()]);
+      let d7 = Nat64.fromIntWrap(mapBase58[input[pos + 7].toNat()]);
+      assert (
+        d0 != 0xff and d1 != 0xff and d2 != 0xff and d3 != 0xff and d4 != 0xff and d5 != 0xff and d6 != 0xff and d7 != 0xff
+      );
 
-    label l loop {
-      switch (current) {
-        case (?' ') {
-          break l;
-        };
-        case (null) {
-          break l;
-        };
-        case (?value) {
-          var carry : Nat = mapBase58[value.toNat32().toNat()].toNat();
-          assert (carry != 0xff);
+      var carry : Nat64 = (((((((d0 *% 58 +% d1) *% 58 +% d2) *% 58 +% d3) *% 58 +% d4) *% 58 +% d5) *% 58 +% d6) *% 58 +% d7);
 
-          var i : Nat = 0;
-          var b256Pointer : Nat = b256.size() - 1;
-          label reverseIter while (carry != 0 or i < length) {
-
-            carry += 58 * b256[b256Pointer].toNat();
-            b256[b256Pointer] := Nat8.fromNat(carry % 256);
-            carry /= 256;
-            i += 1;
-
-            if (b256Pointer == 0) {
-              break reverseIter;
-            };
-            b256Pointer -= 1;
-          };
-
-          assert (carry == 0);
-          length := i;
-        };
+      var i : Nat = 0;
+      var j : Nat = size - 1;
+      label inner while (carry != 0 or i < length) {
+        carry +%= 128_063_081_718_016 *% b256[j].toNat32().toNat64();
+        b256[j] := (carry & 0xff).toNat32().toNat16();
+        carry >>= 8;
+        i += 1;
+        if (j == 0) break inner;
+        j -= 1;
       };
-      current := inputIter.next();
+
+      assert (carry == 0);
+      length := i;
+      pos += 8;
     };
 
     // Skip trailing spaces.
-    label l loop {
-      switch (current) {
-        case (?' ') {};
-        case (_) {
-          break l;
-        };
-      };
-      current := inputIter.next();
+    while (pos < inputSize and input[pos] == 0x20) {
+      pos += 1;
     };
 
     // Check all input was consumed.
-    assert (current == null);
+    assert (pos == inputSize);
 
     // Skip leading zeroes in base256 result.
-    var b256Pointer : Nat = size - length;
-    while (b256Pointer < b256.size() and b256[b256Pointer] == 0) {
-      b256Pointer += 1;
+    var start : Nat = size - length;
+    while (start < size and b256[start] == 0) {
+      start += 1;
     };
 
-    let output = Array.tabulate<Nat8>(
-      zeroes + b256.size() - b256Pointer,
+    Array.tabulate<Nat8>(
+      zeroes + size - start,
       func(i) {
-        if (i < zeroes) {
-          0x00;
-        } else {
-          b256[i + b256Pointer - zeroes];
-        };
+        if (i < zeroes) 0x00 else b256[i + start - zeroes].toNat8();
       },
     );
-
-    return output;
   };
 
   // Convert the given Base256 input to Base58.
   public func encode(input : [Nat8]) : Text {
-    var zeroes : Nat = 0;
+    let inputSize = input.size();
     var length : Nat = 0;
-    var inputPointer : Nat = 0;
+    var pos : Nat = 0;
 
     // Skip & count leading zeroes.
-    while (zeroes < input.size() and input[inputPointer] == 0) {
-      zeroes += 1;
-      inputPointer += 1;
+    while (pos < inputSize and input[pos] == 0) {
+      pos += 1;
     };
+    let zeroes : Nat = pos;
 
     // Allocate enough space in big-endian base58 representation:
     // log(256) / log(58), rounded up.
-    let size : Nat = (input.size() - inputPointer) * 138 / 100 + 1;
-    let b58 : [var Nat8] = VarArray.repeat<Nat8>(0, size);
+    let bytesCount : Nat = inputSize - pos;
+    let size : Nat = bytesCount * 138 / 100 + 1;
+    let b58 : [var Nat16] = VarArray.repeat<Nat16>(0, size);
 
-    while (inputPointer < input.size()) {
-      var carry : Nat = input[inputPointer].toNat();
+    // Process leading remainder bytes (bytesCount % 7) one at a time.
+    let remainder = bytesCount % 7;
+    var rem : Nat = 0;
+    while (rem < remainder) {
+      var carry : Nat16 = input[pos].toNat16();
       var i : Nat = 0;
-      // Apply "b58 = b58 * 256 + ch".
-      var b58Pointer : Nat = b58.size() - 1;
-      label reverseIter while (carry != 0 or i < length) {
-        carry += 256 * (b58[b58Pointer]).toNat();
-        b58[b58Pointer] := Nat8.fromNat(carry % 58);
+      var b58Pointer : Nat = size - 1;
+      label inner while (carry != 0 or i < length) {
+        carry +%= 256 *% b58[b58Pointer];
+        b58[b58Pointer] := carry % 58;
         carry /= 58;
         i += 1;
-        if (b58Pointer == 0) {
-          break reverseIter;
-        };
+        if (b58Pointer == 0) break inner;
         b58Pointer -= 1;
       };
       assert (carry == 0);
       length := i;
-      inputPointer += 1;
+      pos += 1;
+      rem += 1;
+    };
+
+    // Process full batches of 7 bytes: b58 = b58 * 256^7 + v.
+    // 256^7 = 72_057_594_037_927_936. Max carry < 2^62, fits in Nat64.
+    while (pos < inputSize) {
+      var carry : Nat64 = Nat64.fromIntWrap(input[pos].toNat()) << 48 | Nat64.fromIntWrap(input[pos + 1].toNat()) << 40 | Nat64.fromIntWrap(input[pos + 2].toNat()) << 32 | Nat64.fromIntWrap(input[pos + 3].toNat()) << 24 | Nat64.fromIntWrap(input[pos + 4].toNat()) << 16 | Nat64.fromIntWrap(input[pos + 5].toNat()) << 8 | Nat64.fromIntWrap(input[pos + 6].toNat());
+
+      var i : Nat = 0;
+      var b58Pointer : Nat = size - 1;
+      label inner while (carry != 0 or i < length) {
+        carry +%= 72_057_594_037_927_936 *% b58[b58Pointer].toNat32().toNat64();
+        b58[b58Pointer] := (carry % 58).toNat32().toNat16();
+        carry /= 58;
+        i += 1;
+        if (b58Pointer == 0) break inner;
+        b58Pointer -= 1;
+      };
+      assert (carry == 0);
+      length := i;
+      pos += 7;
     };
 
     // Skip leading zeroes in base58 result.
     var b58Pointer : Nat = size - length;
-    while (b58Pointer < b58.size() and b58[b58Pointer] == 0) { b58Pointer += 1 };
+    while (b58Pointer < size and b58[b58Pointer] == 0) {
+      b58Pointer += 1;
+    };
 
-    let output = Array.tabulate<Char>(
-      zeroes + b58.size() - b58Pointer,
+    let outputBytes = Array.tabulate<Nat8>(
+      zeroes + size - b58Pointer,
       func(i) {
         if (i < zeroes) {
-          Char.fromNat32(0x31);
+          0x31 : Nat8;
         } else {
-          base58Alphabet[b58[i + b58Pointer - zeroes].toNat()];
+          base58Alphabet[b58[b58Pointer + i - zeroes].toNat()];
         };
       },
     );
-    return Text.fromIter(output.values());
+
+    arrayToText(outputBytes);
   };
 };

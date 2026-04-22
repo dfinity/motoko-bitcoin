@@ -1,15 +1,15 @@
 import Array "mo:core/Array";
-import { type Result } "mo:core/Types";
 import Nat "mo:core/Nat";
+import { type Result } "mo:core/Types";
 
 import Common "../Common";
+import Hash "../Hash";
+import Segwit "../Segwit";
 import Curves "../ec/Curves";
 import Fp "../ec/Fp";
-import Hash "../Hash";
 import Jacobi "../ec/Jacobi";
-import Script "./Script";
-import Segwit "../Segwit";
-import Types "./Types";
+import Script "Script";
+import Types "Types";
 
 module {
   type PublicKey = {

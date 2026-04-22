@@ -22,13 +22,13 @@ module {
       number /= 2;
     };
 
-    return bitsBuffer.toArray();
+    bitsBuffer.toArray();
   };
 
   // Convert given number to binary represented as an array of Bool.
   public func toBinary(a : Nat) : [Bool] {
     let reversedBinary = toBinaryReversed(a);
-    return Array.tabulate<Bool>(
+    Array.tabulate<Bool>(
       reversedBinary.size(),
       func(i) {
         reversedBinary[reversedBinary.size() - i - 1];
@@ -55,6 +55,6 @@ module {
       input /= 2;
     };
 
-    return output.toArray();
+    output.toArray();
   };
 };

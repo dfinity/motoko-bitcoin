@@ -1,10 +1,10 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import List "mo:core/List";
-import { type Iter; type Result } "mo:core/Types";
 import Nat "mo:core/Nat";
 import Nat32 "mo:core/Nat32";
 import Text "mo:core/Text";
+import { type Iter; type Result } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 import Sha256 "mo:sha2/Sha256";
@@ -12,10 +12,10 @@ import Sha256 "mo:sha2/Sha256";
 import ByteUtils "../ByteUtils";
 import Common "../Common";
 import Hash "../Hash";
-import Script "./Script";
-import TxInput "./TxInput";
-import TxOutput "./TxOutput";
-import Types "./Types";
+import Script "Script";
+import TxInput "TxInput";
+import TxOutput "TxOutput";
+import Types "Types";
 import Witness "Witness";
 
 module {
@@ -165,7 +165,7 @@ module {
     /// the id that includes witness is denoted as wtxid.
     public func txid() : [Nat8] {
       let doubleHash : [Nat8] = Hash.doubleSHA256(toBytesIgnoringWitness());
-      return Array.tabulate<Nat8>(
+      Array.tabulate<Nat8>(
         doubleHash.size(),
         func(n : Nat) {
           doubleHash[doubleHash.size() - 1 - n];
@@ -205,7 +205,7 @@ module {
       Common.copy(output, 0, txData, 0, txData.size());
       Common.writeLE32(output, txData.size(), sigHashType);
 
-      return Hash.doubleSHA256(Array.fromVarArray(output));
+      Hash.doubleSHA256(output.toArray());
     };
 
     /// Create a P2TR key spend signature hash for this transaction. This is
@@ -254,7 +254,7 @@ module {
           Common.writeLE32(vout_buffer, 0, txin.prevOutput.vout);
           let prevout = [
             txin.prevOutput.txid.toArray(),
-            Array.fromVarArray(vout_buffer),
+            vout_buffer.toArray(),
           ].flatten();
           prevout;
         }
@@ -265,23 +265,25 @@ module {
 
       let sighash_type : [Nat8] = [0x00];
       let nVersion_buffer = VarArray.repeat<Nat8>(0, 4);
-      Common.writeLE32(nVersion_buffer, 0, 2);
-      let nVersion = Array.fromVarArray<Nat8>(nVersion_buffer);
+      Common.writeLE32(nVersion_buffer, 0, version);
+      let nVersion = nVersion_buffer.toArray();
 
-      let nLockTime : [Nat8] = Array.fromVarArray(VarArray.repeat<Nat8>(0, 4));
+      let nLockTime_buffer = VarArray.repeat<Nat8>(0, 4);
+      Common.writeLE32(nLockTime_buffer, 0, locktime);
+      let nLockTime = nLockTime_buffer.toArray();
       let sha_prevouts : [Nat8] = Sha256.fromArray(#sha256, prevouts.flatten()).toArray();
 
       let amounts_bytes = amounts.map<Nat64, [Nat8]>(
         func(amount) {
           let amount_bytes = VarArray.repeat<Nat8>(0, 8);
           Common.writeLE64(amount_bytes, 0, amount);
-          Array.fromVarArray(amount_bytes);
+          amount_bytes.toArray();
         }
       ).flatten();
       let sha_amounts : [Nat8] = Sha256.fromArray(#sha256, amounts_bytes).toArray();
 
       let scriptpubkeys = VarArray.repeat<[Nat8]>(Script.toBytes(scriptPubKey), txInputs.size());
-      let sha_scriptpubkeys : [Nat8] = Sha256.fromArray(#sha256, Array.fromVarArray(scriptpubkeys).flatten()).toArray();
+      let sha_scriptpubkeys : [Nat8] = Sha256.fromArray(#sha256, scriptpubkeys.toArray().flatten()).toArray();
 
       // ignote the nSequence flag
       // this is inlined generation of the 0xFFFFFFFF flag for each input
@@ -291,7 +293,7 @@ module {
         func(txin) {
           let sequence_buffer = VarArray.repeat<Nat8>(0, 4);
           Common.writeLE32(sequence_buffer, 0, txin.sequence);
-          Array.fromVarArray(sequence_buffer);
+          sequence_buffer.toArray();
         }
       );
       let sequences = sequences_buffer.flatten();
@@ -307,7 +309,7 @@ module {
 
       let input_index_buffer = VarArray.repeat<Nat8>(0, 4);
       Common.writeLE32(input_index_buffer, 0, txInputIndex);
-      let input_index = Array.fromVarArray(input_index_buffer);
+      let input_index = input_index_buffer.toArray();
 
       // spend_type = (ext_flag * 2) + annex_present
       let (spend_type, scriptpath_bytes) : ([Nat8], [Nat8]) = switch (maybe_leaf_hash) {
@@ -339,13 +341,13 @@ module {
         scriptpath_bytes,
       ].flatten<Nat8>();
 
-      return Hash.taggedHash(data, "TapSighash");
+      Hash.taggedHash(data, "TapSighash");
     };
 
     /// Serialize transaction to bytes with layout:
     /// `| version | witness flags if it is present | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |`
     public func toBytes() : [Nat8] {
-      let has_non_empty_witness = Array.fromVarArray(witnesses).foldLeft<Witness.Witness, Bool>(
+      let has_non_empty_witness = witnesses.toArray().foldLeft<Witness.Witness, Bool>(
         false,
         func(accum, witness) {
           (witness.size() > 0) or accum;
@@ -488,7 +490,7 @@ module {
       outputOffset += 4;
 
       assert (outputOffset == output.size());
-      let result = Array.fromVarArray(output);
+      let result = output.toArray();
       result;
     };
 
@@ -601,7 +603,7 @@ module {
       outputOffset += 4;
 
       assert (outputOffset == output.size());
-      Array.fromVarArray(output);
+      output.toArray();
     };
   };
 };

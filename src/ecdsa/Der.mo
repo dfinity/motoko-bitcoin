@@ -1,14 +1,13 @@
-import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import List "mo:core/List";
-import { type Result; type Iter } "mo:core/Types";
 import Nat "mo:core/Nat";
 import Nat8 "mo:core/Nat8";
+import { type Result; type Iter } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 import ByteUtils "../ByteUtils";
 import Common "../Common";
-import Types "./Types";
+import Types "Types";
 
 module {
   type DerSignature = Types.DerSignature;
@@ -45,7 +44,7 @@ module {
         };
       };
 
-      return outputBuf.toArray();
+      outputBuf.toArray();
     };
 
     let output = List.empty<Nat8>();
@@ -91,7 +90,7 @@ module {
       output.add(i);
     };
 
-    return Blob.fromArray(output.toArray());
+    Blob.fromArray(output.toArray());
   };
 
   // Accepts a Blob containing the concatenation of the 32-byte big endian
@@ -105,7 +104,7 @@ module {
     Common.copy(rdata, 0, data, 0, 32);
     Common.copy(sdata, 0, data, 32, 32);
 
-    return _encodeSignature(Array.fromVarArray(rdata), Array.fromVarArray(sdata));
+    _encodeSignature(rdata.toArray(), sdata.toArray());
   };
 
   // Decode signature in DER format.
@@ -182,7 +181,7 @@ module {
       for (i in Nat.range(0, Nat.min(rData.size(), 32))) {
         aligned[aligned.size() - 1 - i] := rData[rData.size() - 1 - i];
       };
-      Array.fromVarArray(aligned);
+      aligned.toArray();
     } else {
       rData;
     };
@@ -193,7 +192,7 @@ module {
       for (i in Nat.range(0, Nat.min(sData.size(), 32))) {
         aligned[aligned.size() - 1 - i] := sData[sData.size() - 1 - i];
       };
-      Array.fromVarArray(aligned);
+      aligned.toArray();
     } else {
       sData;
     };

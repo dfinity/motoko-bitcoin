@@ -2,7 +2,7 @@ import { type Result } "mo:core/Types";
 
 import Affine "../ec/Affine";
 import Curves "../ec/Curves";
-import Types "./Types";
+import Types "Types";
 
 module {
   type PublicKey = Types.PublicKey;
@@ -66,6 +66,6 @@ module {
     compressed : Bool,
   ) : Types.Sec1PublicKey {
     let point : Affine.Point = #point(pk.coords.x, pk.coords.y, pk.curve);
-    return (Affine.toBytes(point, compressed), pk.curve);
+    (Affine.toBytes(point, compressed), pk.curve);
   };
 };

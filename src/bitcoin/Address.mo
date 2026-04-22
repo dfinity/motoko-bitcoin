@@ -1,10 +1,10 @@
 import { type Result } "mo:core/Types";
 
-import P2pkh "./P2pkh";
-import P2tr "./P2tr";
-import Script "./Script";
 import Segwit "../Segwit";
-import Types "./Types";
+import P2pkh "P2pkh";
+import P2tr "P2tr";
+import Script "Script";
+import Types "Types";
 
 module {
   public func addressFromText(address : Text) : Result<Types.Address, Text> {

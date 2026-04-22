@@ -1,12 +1,11 @@
-import Array "mo:core/Array";
-import { type Iter } "mo:core/Types";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat64 "mo:core/Nat64";
 import Nat8 "mo:core/Nat8";
+import { type Iter } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
-import Common "./Common";
+import Common "Common";
 
 module {
   // Read a number of elements from the given iterator and return as array. If
@@ -18,6 +17,8 @@ module {
     reverse : Bool,
   ) : ?[Nat8] {
     do ? {
+      if (count == 0) return ?[];
+
       let readData : [var Nat8] = VarArray.repeat<Nat8>(0, count);
       if (reverse) {
         var nextReadIndex : Nat = count - 1;
@@ -38,7 +39,7 @@ module {
         };
       };
 
-      Array.fromVarArray(readData);
+      readData.toArray();
     };
   };
 
@@ -47,7 +48,7 @@ module {
   public func readLE16(data : Iter<Nat8>) : ?Nat16 {
     do ? {
       let (a, b) = (data.next()!, data.next()!);
-      Nat16.fromIntWrap(b.toNat()) << 8 | Nat16.fromIntWrap(a.toNat());
+      b.toNat16() << 8 | a.toNat16();
     };
   };
 
@@ -56,7 +57,7 @@ module {
   public func readLE32(data : Iter<Nat8>) : ?Nat32 {
     do ? {
       let (a, b, c, d) = (data.next()!, data.next()!, data.next()!, data.next()!);
-      Nat32.fromIntWrap(d.toNat()) << 24 | Nat32.fromIntWrap(c.toNat()) << 16 | Nat32.fromIntWrap(b.toNat()) << 8 | Nat32.fromIntWrap(a.toNat());
+      d.toNat16().toNat32() << 24 | c.toNat16().toNat32() << 16 | b.toNat16().toNat32() << 8 | a.toNat16().toNat32();
     };
   };
 
@@ -75,7 +76,7 @@ module {
         data.next()!,
       );
 
-      Nat64.fromIntWrap(h.toNat()) << 56 | Nat64.fromIntWrap(g.toNat()) << 48 | Nat64.fromIntWrap(f.toNat()) << 40 | Nat64.fromIntWrap(e.toNat()) << 32 | Nat64.fromIntWrap(d.toNat()) << 24 | Nat64.fromIntWrap(c.toNat()) << 16 | Nat64.fromIntWrap(b.toNat()) << 8 | Nat64.fromIntWrap(a.toNat());
+      h.toNat16().toNat32().toNat64() << 56 | g.toNat16().toNat32().toNat64() << 48 | f.toNat16().toNat32().toNat64() << 40 | e.toNat16().toNat32().toNat64() << 32 | d.toNat16().toNat32().toNat64() << 24 | c.toNat16().toNat32().toNat64() << 16 | b.toNat16().toNat32().toNat64() << 8 | a.toNat16().toNat32().toNat64();
     };
   };
 
@@ -110,18 +111,18 @@ module {
   public func writeVarint(value : Nat) : [Nat8] {
     assert (value < 0x10000000000000000);
 
-    return if (value < 0xfd) { [Nat8.fromIntWrap(value)] } else if (value < 0x10000) {
-      let result = VarArray.repeat<Nat8>(0xfd, 3);
-      Common.writeLE16(result, 1, Nat16.fromIntWrap(value));
-      Array.fromVarArray(result);
+    if (value < 0xfd) { [Nat8.fromIntWrap(value)] } else if (value < 0x10000) {
+      let buf = VarArray.repeat<Nat8>(0xfd, 3);
+      Common.writeLE16(buf, 1, Nat16.fromIntWrap(value));
+      buf.toArray();
     } else if (value < 0x100000000) {
-      let result = VarArray.repeat<Nat8>(0xfe, 5);
-      Common.writeLE32(result, 1, Nat32.fromIntWrap(value));
-      Array.fromVarArray(result);
+      let buf = VarArray.repeat<Nat8>(0xfe, 5);
+      Common.writeLE32(buf, 1, Nat32.fromIntWrap(value));
+      buf.toArray();
     } else {
-      let result = VarArray.repeat<Nat8>(0xff, 9);
-      Common.writeLE64(result, 1, Nat64.fromIntWrap(value));
-      Array.fromVarArray(result);
+      let buf = VarArray.repeat<Nat8>(0xff, 9);
+      Common.writeLE64(buf, 1, Nat64.fromIntWrap(value));
+      buf.toArray();
     };
   };
 };

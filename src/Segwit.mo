@@ -1,11 +1,12 @@
-import List "mo:core/List";
-import { type Result; type Iter } "mo:core/Types";
+import Array "mo:core/Array";
 import Nat "mo:core/Nat";
+import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
-import Runtime "mo:core/Runtime";
+import { type Result } "mo:core/Types";
+import VarArray "mo:core/VarArray";
 
-import Bech32 "../src/Bech32";
+import Bech32 "Bech32";
 
 module {
 
@@ -17,14 +18,9 @@ module {
   // Convert a Witness Program to a SegWit Address.
   public func encode(hrp : Text, { version; program } : WitnessProgram) : Result<Text, Text> {
 
-    let bech32Input = List.empty<Nat8>();
-    bech32Input.add(version);
-
-    switch (convertBits(program.values(), bech32Input, 8, 5, true)) {
-      case (#err(msg)) {
-        return #err(msg);
-      };
-      case _ {};
+    let converted = switch (convertBits(program, 0, 8, 5, true)) {
+      case (#err(msg)) return #err(msg);
+      case (#ok(c)) c;
     };
 
     let encoding : Bech32.Encoding = if (version > 0) {
@@ -35,7 +31,7 @@ module {
 
     let bech32Result : Text = Bech32.encode(
       hrp,
-      bech32Input.toArray(),
+      [[version] : [Nat8], converted].flatten(),
       encoding,
     );
 
@@ -67,69 +63,61 @@ module {
       return #err("Invalid data length.");
     };
 
-    // Split into version and program.
-    let dataIter : Iter<Nat8> = data.values();
-    let version : Nat8 = switch (dataIter.next()) {
-      case (?val) {
-        val;
-      };
-      case _ {
-        Runtime.trap("unreachable");
-      };
+    let version : Nat8 = data[0];
+
+    if (version > 16) {
+      return #err("Invalid witness version.");
     };
 
-    let convertedData = List.empty<Nat8>();
-    switch (convertBits(dataIter, convertedData, 5, 8, false)) {
-      case (#ok) {
-        let convertedDataSize : Nat = convertedData.size();
-
-        if (convertedDataSize < 2 or convertedDataSize > 40) {
-          return #err("Wrong output size.");
-        };
-
-        if (data[0] > 16) {
-          return #err("Invalid witness version.");
-        };
-
-        if (
-          data[0] == 0 and convertedDataSize != 20 and convertedDataSize != 32
-        ) {
-          return #err("Program size does not match witness version.");
-        };
-
-        if (
-          data[0] == 0 and encoding != #BECH32 or
-          data[0] != 0 and encoding != #BECH32M
-        ) {
-          return #err("Encoding does not match witness version.");
-        };
-
-        return #ok(decodedHrp, { version; program = convertedData.toArray() });
-      };
-      case _ {
-        return #err("Convert bits failed.");
-      };
+    let convertedData = switch (convertBits(data, 1, 5, 8, false)) {
+      case (#err(msg)) return #err(msg);
+      case (#ok(d)) d;
     };
+
+    let convertedDataSize : Nat = convertedData.size();
+
+    if (convertedDataSize < 2 or convertedDataSize > 40) {
+      return #err("Wrong output size.");
+    };
+
+    if (
+      version == 0 and convertedDataSize != 20 and convertedDataSize != 32
+    ) {
+      return #err("Program size does not match witness version.");
+    };
+
+    if (
+      version == 0 and encoding != #BECH32 or
+      version != 0 and encoding != #BECH32M
+    ) {
+      return #err("Encoding does not match witness version.");
+    };
+
+    #ok(decodedHrp, { version; program = convertedData });
   };
 
   // Convert between two bases that are power of 2.
   func convertBits(
-    data : Iter<Nat8>,
-    output : List.List<Nat8>,
+    data : [Nat8],
+    start : Nat,
     from : Nat32,
     to : Nat32,
     pad : Bool,
-  ) : Result<(), Text> {
+  ) : Result<[Nat8], Text> {
 
     var acc : Nat32 = 0;
     var bits : Nat32 = 0;
     let maxv : Nat32 = (1 << to) - 1;
+    let dataSize = data.size();
+    let output = VarArray.repeat<Nat8>(0, (dataSize - start) * from.toNat() / to.toNat() + 1);
+    var outputLen : Nat = 0;
 
-    for (value in data) {
-      let v : Nat32 = Nat32.fromIntWrap(value.toNat());
+    var pos = start;
+    while (pos < dataSize) {
+      let v : Nat32 = data[pos].toNat16().toNat32();
 
       if ((v >> from) != 0) {
-        return #err("Invalid input value: " # value.toNat().toText());
+        return #err("Invalid input value: " # data[pos].toNat().toText());
       };
 
       acc := (acc << from) | v;
@@ -137,26 +125,21 @@ module {
 
       while (bits >= to) {
         bits -= to;
-        output.add(
-          Nat8.fromIntWrap(
-            ((acc >> bits) & maxv).toNat()
-          )
-        );
+        output[outputLen] := ((acc >> bits) & maxv).toNat16().toNat8();
+        outputLen += 1;
       };
+      pos += 1;
     };
 
     if (pad) {
       if (bits > 0) {
-        output.add(
-          Nat8.fromIntWrap(
-            ((acc << (to - bits)) & maxv).toNat()
-          )
-        );
+        output[outputLen] := ((acc << (to - bits)) & maxv).toNat16().toNat8();
+        outputLen += 1;
       };
     } else if (bits >= from or ((acc << (to - bits)) & maxv) != 0) {
       return #err("Invalid Padding");
     };
 
-    return #ok;
+    #ok(Array.tabulate<Nat8>(outputLen, func(i) = output[i]));
   };
 };
