@@ -1,152 +1,186 @@
 [![mops](https://oknww-riaaa-aaaam-qaf6a-cai.raw.ic0.app/badge/mops/bitcoin)](https://mops.one/bitcoin)
 [![documentation](https://oknww-riaaa-aaaam-qaf6a-cai.raw.ic0.app/badge/documentation/bitcoin)](https://mops.one/bitcoin/docs)
 
-# Algorithms for Bitcoin Integration in Motoko
+# mo:bitcoin — Bitcoin for Motoko
 
-Requires the [`mops`](https://docs.mops.one/quick-start) package manager for Motoko.
+Motoko library for Bitcoin integration on the Internet Computer. Provides:
+
+- **Bitcoin canister API bindings** — typed actor for `bitcoin_get_balance`, `bitcoin_get_utxos`, `bitcoin_send_transaction`, and more
+- **Address generation** — P2PKH, P2TR (key-path and script-path), and P2WPKH (SegWit v0)
+- **Transaction building and signing** — construct and sign Bitcoin transactions using ECDSA/Schnorr threshold keys
+- **Cryptographic primitives** — ECDSA, BIP32, Base58, Bech32, RIPEMD160, HMAC, Segwit
+
+Requires the [`mops`](https://docs.mops.one/quick-start) package manager.
+
+```
+mops add bitcoin
+```
+
+See the [Internet Computer Bitcoin integration docs](https://docs.internetcomputer.org/guides/chain-fusion/bitcoin) for background.
+
+---
+
+## Bitcoin Canister API
+
+The `Canister` module provides a typed actor for the [official Bitcoin canister](https://github.com/dfinity/bitcoin-canister) and helpers for creating the right actor per network.
+
+### Quick start
+
+```motoko
+import Canister "mo:bitcoin/bitcoin/Canister";
+import Types "mo:bitcoin/bitcoin/Types";
+
+// Get the Bitcoin canister actor for testnet
+let btc = Canister.createActor(#testnet);
+
+// Check the current fee schedule before making calls
+let config = await btc.get_config();
+let getBalanceFee = config.fees.get_balance;
+
+// Query balance (update call — goes through consensus)
+let balance : Types.Satoshi = await (with cycles = getBalanceFee) btc.bitcoin_get_balance({
+  network = #testnet;
+  address = "tb1q...";
+  min_confirmations = null;
+});
+
+// Query balance (query call — faster, no consensus)
+let balance2 : Types.Satoshi = await btc.bitcoin_get_balance_query({
+  network = #testnet;
+  address = "tb1q...";
+  min_confirmations = null;
+});
+```
+
+### Default canister IDs
+
+| Network | Canister ID |
+|---------|-------------|
+| Mainnet | `ghsi2-tqaaa-aaaan-aaaca-cai` |
+| Testnet | `g4xu7-jiaaa-aaaan-aaaaq-cai` |
+| Regtest (local PocketIC) | `g4xu7-jiaaa-aaaan-aaaaq-cai` |
+
+To target a custom deployment, construct the actor directly:
+```motoko
+let btc = actor("your-canister-id") : Canister.Bitcoin;
+```
+
+### Cycle costs
+
+Cycle costs are **dynamically configurable** by the Bitcoin canister admins. Always call `get_config()` at runtime to get the current `Fees` record rather than relying on hardcoded values:
+
+```motoko
+let config = await btc.get_config();
+// config.fees contains: get_balance, get_utxos_base, send_transaction_base, ...
+```
+
+### Available API methods
+
+| Method | Type | Description |
+|--------|------|-------------|
+| `bitcoin_get_balance` | update | Balance for an address (consensus) |
+| `bitcoin_get_balance_query` | query | Balance for an address (fast, no consensus) |
+| `bitcoin_get_utxos` | update | UTXOs for an address (consensus) |
+| `bitcoin_get_utxos_query` | query | UTXOs for an address (fast, no consensus) |
+| `bitcoin_get_current_fee_percentiles` | update | Fee rate percentiles from recent txs |
+| `bitcoin_get_block_headers` | update | Raw block headers for a height range |
+| `bitcoin_send_transaction` | update | Submit a signed transaction |
+| `get_config` | query | Current canister config (including `Fees`) |
+| `get_blockchain_info` | query | Tip height, hash, timestamp, difficulty |
+
+---
+
+## Address Generation
+
+```motoko
+import P2pkh "mo:bitcoin/bitcoin/P2pkh";
+import P2tr "mo:bitcoin/bitcoin/P2tr";
+import Types "mo:bitcoin/bitcoin/Types";
+
+// P2PKH address (Legacy)
+let address : Text = switch (P2pkh.deriveAddress(Types.network_to_network_camel_case(#testnet), publicKey)) {
+  case (#ok(addr)) addr;
+  case (#err(e)) Runtime.trap(e);
+};
+
+// P2TR address (Taproot)
+// See src/bitcoin/P2tr.mo for full API
+```
+
+---
+
+## Low-level utilities
+
+<details>
+<summary>Base58, HMAC, RIPEMD160, EC, BIP32, Bech32, Segwit</summary>
+
+**Base58:**
+```motoko
+import Base58 "mo:bitcoin/Base58";
+let encoded : Text = Base58.encode([/* Nat8 data */]);
+```
+
+**Base58Check:**
+```motoko
+import Base58Check "mo:bitcoin/Base58Check";
+let encoded : Text = Base58Check.encode([/* Nat8 data */]);
+```
+
+**HMAC:**
+```motoko
+import Hmac "mo:bitcoin/Hmac";
+let hmac : Hmac.Hmac = Hmac.sha256(key);
+hmac.write([/* data */]);
+let result : [Nat8] = hmac.sum();
+```
+
+**RIPEMD160:**
+```motoko
+import Ripemd160 "mo:bitcoin/Ripemd160";
+let digest : Ripemd160.Digest = Ripemd160.Digest();
+digest.write([/* data */]);
+let result : [Nat8] = digest.sum();
+```
+
+**EC (secp256k1):**
+```motoko
+import Jacobi "mo:bitcoin/ec/Jacobi";
+import Curves "mo:bitcoin/ec/Curves";
+let point = Jacobi.mulBase(1234, Curves.secp256k1);
+```
+
+**BIP32:**
+```motoko
+import Bip32 "mo:bitcoin/Bip32";
+let rootKey = Bip32.parse("xpub...", null);
+```
+
+**Bech32:**
+```motoko
+import Bech32 "mo:bitcoin/Bech32";
+Bech32.encode("bc", [/* data */], #BECH32);
+```
+
+**Segwit:**
+```motoko
+import Segwit "mo:bitcoin/Segwit";
+Segwit.encode("bc", /* WitnessProgram */);
+```
+
+</details>
+
+---
 
 ## Testing
 
-Run all tests
-
-```
+```sh
 mops test --mode wasi
 ```
 
 ## Benchmarks
 
-This project includes performance benchmarks using the `bench` mops package.
-
-Run all benchmarks locally:
-
 ```sh
 mops bench
 ```
 
-Tips:
-
-- Use your shell's filtering (or bench runner options) to focus on specific suites, e.g., base58 or bitcoin tx.
-- Benchmark files are located under the `bench/` directory and cover encoding (Base58/Base58Check/Bech32), hashing and HMAC, BIP32 derivation, EC arithmetic, ECDSA verification, and Bitcoin transaction building and sighash.
-
-## Usage
-
-Base58:
-
-```motoko
-import Base58 "src/Base58";
-
-let encoded : Text = Base58.encode([/* Nat8 data */]);
-
-```
-
-Base58Check:
-
-```motoko
-import Base58Check "src/Base58Check";
-
-let encoded : Text = Base58Check.encode([/* Nat8 data */]);
-
-```
-
-HMAC:
-
-```motoko
-import Hmac "src/Hmac";
-
-let key : [Nat8] = [/* Key bytes */];
-
-// HMAC-SHA256
-let hmacSha256 : Hmac.Hmac = Hmac.sha256(key);
-hmacSha256.write([/* Nat8 data */]);
-var result : [Nat8] = hmacSha256.sum();
-
-// HMAC-SHA512
-let hmacSha512 : Hmac.Hmac = Hmac.sha512(key);
-hmacSha512.write([/* Nat8 data */]);
-result := hmacSha512.sum();
-
-// HMAC-X
-let hmacCustomDigest : Hmac.Hmac = Hmac.new(
-  key,
-  object {
-    public let blockSize : Nat = 64;
-    public func create() : Hmac.Digest = object {
-      public func write(data : [Nat8]) { /* Process input */ };
-      public func sum() : [Nat8] = [/* Compute sum */];
-    };
-  },
-);
-hmacCustomDigest.write([/* Nat8 data */]);
-result := hmacCustomDigest.sum();
-
-```
-
-RIPEMD160:
-
-```motoko
-import Ripemd160 "src/Ripemd160";
-
-let digest : Ripemd160.Digest = Ripemd160.Digest();
-digest.write([/* Nat8 data */]);
-digest.write([/* Nat8 data */]);
-let result : [Nat8] = digest.sum();
-
-```
-
-EC
-
-```motoko
-import Jacobi "src/ec/Jacobi";
-import Affine "src/ec/Affine";
-import Curves "src/ec/Curves";
-
-// Get secp256k1 curve parameters.
-let secp256k1 : Curves.Curve = Curves.secp256k1;
-let Fp = secp256k1.Fp;
-
-// Create affine point on the secp256k1 curve
-let basePointAffine : Affine.Point = #point(Fp(secp256k1.gx), Fp(secp256k1.gy), secp256k1);
-// Convert to Jacobi point
-let basePointJacobi : Jacobi.Point = Jacobi.fromAffine(basePointAffine);
-
-// Scalar multiplication
-let mul1 = Jacobi.mul(basePointJacobi, 1234);
-let mul2 = Jacobi.mulBase(1234, Curves.secp256k1);
-
-assert (Jacobi.isEqual(mul1, mul2));
-
-```
-
-Bip32
-
-```motoko
-import Bip32 "src/Bip32";
-
-let rootKey : ?Bip32.ExtendedPublicKey = Bip32.parse("xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8", null);
-
-do ? {
-  let derived : ?Bip32.ExtendedPublicKey = rootKey!.derivePath(#text "m/1/2/3");
-  derived!;
-};
-
-```
-
-Bech32:
-
-```motoko
-import Bech32 "src/Bech32";
-
-Bech32.encode("bc", [/* Nat8 data */], #BECH32);
-Bech32.decode("bc", "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4");
-
-```
-
-Segwit:
-
-```motoko
-import Segwit "src/Segwit";
-
-Segwit.encode("bc", /* WitnessProgram */);
-Segwit.decode("bc", "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4");
-
-```
+Benchmark files in `bench/` cover: Base58/Base58Check/Bech32, hashing and HMAC, BIP32, EC arithmetic, ECDSA verification, and Bitcoin transaction building.
