@@ -12,9 +12,9 @@ module {
   // The type of Bitcoin network.
   /// Supported Bitcoin networks.
   public type Network = {
-    #Mainnet;
-    #Regtest;
-    #Testnet;
+    #mainnet;
+    #regtest;
+    #testnet;
   };
 
   // A reference to a transaction output.

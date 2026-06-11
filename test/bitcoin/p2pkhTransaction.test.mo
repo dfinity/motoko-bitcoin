@@ -52,7 +52,7 @@ func makeTransaction(testCase : TransactionTestCase) : Transaction.Transaction {
     func(output : TxOutput) {
       switch (
         P2pkh.makeScript(
-          P2pkh.deriveAddress(#Mainnet, (output.publicKey, Curves.secp256k1))
+          P2pkh.deriveAddress(#mainnet, (output.publicKey, Curves.secp256k1))
         )
       ) {
         case (#ok script) {

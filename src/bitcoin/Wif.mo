@@ -24,10 +24,10 @@ module {
   // Map network to WIF version prefix.
   func _encodeVersion(network : Types.Network) : Nat8 {
     switch (network) {
-      case (#Mainnet) {
+      case (#mainnet) {
         0x80;
       };
-      case (#Regtest or #Testnet) {
+      case (#regtest or #testnet) {
         0xef;
       };
     };
@@ -37,10 +37,10 @@ module {
   func decodeVersion(version : Nat8) : ?Types.Network {
     switch (version) {
       case (0x80) {
-        ?(#Mainnet);
+        ?(#mainnet);
       };
       case (0xef) {
-        ?(#Testnet);
+        ?(#testnet);
       };
       case _ {
         null;

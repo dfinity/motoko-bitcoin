@@ -58,10 +58,10 @@ module {
   // Map given network to its id.
   func encodeVersion(network : Types.Network) : Nat8 {
     switch (network) {
-      case (#Mainnet) {
+      case (#mainnet) {
         0x00;
       };
-      case (#Regtest or #Testnet) {
+      case (#regtest or #testnet) {
         0x6f;
       };
     };
@@ -118,10 +118,10 @@ module {
 
     return switch (decoded.next(), ByteUtils.read(decoded, 20, false)) {
       case (?(0x00), ?publicKeyHash) {
-        #ok { network = #Mainnet; publicKeyHash = publicKeyHash };
+        #ok { network = #mainnet; publicKeyHash = publicKeyHash };
       };
       case (?(0x6f), ?publicKeyHash) {
-        #ok { network = #Testnet; publicKeyHash = publicKeyHash };
+        #ok { network = #testnet; publicKeyHash = publicKeyHash };
       };
       case (?(_networkId), ?_) {
         #err("Unrecognized network id.");
